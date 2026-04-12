@@ -1,0 +1,44 @@
+---
+interface Props {
+  href?: string;
+  to?: string;
+  label?: string;
+  variant?: string;
+  small?: boolean;
+  external?: boolean;
+  class?: string;
+}
+
+const { 
+  href, 
+  to, 
+  label, 
+  variant = 'secondary', 
+  small = false, 
+  external = false,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const cls = [
+  'btn',
+  `btn--${variant}`,
+  small ? 'btn--sm' : '',
+  className,
+].filter(Boolean).join(' ');
+
+const content = label;
+const isExternal = external || (href && href.startsWith('http'));
+const targetUrl = to || href;
+---
+
+<a 
+  href={targetUrl}
+  class={cls}
+  {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
+  {...rest}
+>
+  <slot>{content}</slot>
+  {isExternal && <span aria-hidden="true" style="font-size: 0.85em;">↗</span>}
+</a>
+
