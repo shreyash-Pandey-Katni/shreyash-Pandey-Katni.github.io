@@ -454,3 +454,26 @@ export const workContent = {
   intro:
     "I work best on products that need both strong engineering fundamentals and pragmatic AI. That usually means shipping under production constraints, not just building prototypes.",
 };
+
+export const pageMeta = {
+  "/": {
+    title: "Shreyash Pandey — AI Systems Engineer",
+    description:
+      "Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering.",
+  },
+  "/work": {
+    title: "Work · Shreyash Pandey",
+    description:
+      "SDE2 at IBM building AI-powered auto-healing for 5K+ test locators, microservice runtimes at 4–5K rpm, and a hackathon-winning semantic search engine. Three years of applied AI and backend engineering.",
+  },
+  "/about": {
+    title: "About · Shreyash Pandey",
+    description:
+      "Background, skills, and operating style of Shreyash Pandey — AI systems engineer in Bengaluru with expertise in Python, Java, PyTorch, LangChain, and production reliability.",
+  },
+  "/projects": {
+    title: "Projects · Shreyash Pandey",
+    description:
+      "Flagship 2026 builds: Phoenix 125M LLM trained from scratch, multilingual Hindi/Kannada models, an agentic LinkedIn publishing pipeline, an AI security orchestrator, and more.",
+  },
+};

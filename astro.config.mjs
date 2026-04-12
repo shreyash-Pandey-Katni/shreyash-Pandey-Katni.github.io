@@ -1,7 +1,9 @@
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://shreyash-pandey-katni.github.io/',
+  site: 'https://shreyash.co.in',
   outDir: './dist',
-  publicDir: './public'
+  publicDir: './public',
+  integrations: [sitemap()],
 });

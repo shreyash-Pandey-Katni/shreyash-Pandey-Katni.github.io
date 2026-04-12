@@ -9,12 +9,14 @@ import {
   siteMeta,
   socialLinks,
   primaryContactHref,
+  pageMeta,
 } from '../data/siteContent';
 
 const { intro, secondary, values, outsideWork, education } = aboutContent;
+const { title, description } = pageMeta['/about'];
 ---
 
-<BaseLayout title="About">
+<BaseLayout title={title} description={description}>
   {/* ===== INTRO ROW ===== */}
   <section class="page__section">
     <div class="bento reveal-stagger">

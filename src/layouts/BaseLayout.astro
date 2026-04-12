@@ -1,13 +1,60 @@
 ---
 import Nav from '../components/Nav.astro';
 import '../styles/index.css';
+import { siteMeta } from '../data/siteContent';
 
 interface Props {
   title?: string;
-  eyebrow?: string;
+  description?: string;
+  ogImage?: string;
 }
 
-const { title = 'Shreyash Pandey' } = Astro.props;
+const {
+  title = 'Shreyash Pandey — AI Systems Engineer',
+  description = 'Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering.',
+  ogImage = '/og-image.png',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, 'https://shreyash.co.in').href;
+const ogImageURL = new URL(ogImage, 'https://shreyash.co.in').href;
+
+const isHome    = Astro.url.pathname === '/';
+const isAbout   = Astro.url.pathname === '/about';
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Shreyash Pandey',
+  url: 'https://shreyash.co.in',
+  jobTitle: 'AI Systems Engineer',
+  worksFor: { '@type': 'Organization', name: 'IBM Software Labs' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Bengaluru', addressCountry: 'IN' },
+  sameAs: [
+    siteMeta.github,
+    siteMeta.linkedin,
+    siteMeta.medium,
+    siteMeta.huggingFace,
+    siteMeta.stackOverflow,
+    siteMeta.topmate,
+  ],
+};
+
+const webSiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Shreyash Pandey',
+  url: 'https://shreyash.co.in',
+};
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description,
+  url: canonicalURL,
+  inLanguage: 'en',
+  isPartOf: { '@type': 'WebSite', url: 'https://shreyash.co.in' },
+};
 ---
 
 <!doctype html>
@@ -16,13 +63,44 @@ const { title = 'Shreyash Pandey' } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#F2F0ED" />
-    <meta
-      name="description"
-      content="Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering."
-    />
+
+    <!-- Primary SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Shreyash Pandey" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Structured data: WebPage on every route -->
+    <script type="application/ld+json" set:html={JSON.stringify(webPageSchema)} />
+
+    <!-- Structured data: Person + WebSite on home and about -->
+    {(isHome || isAbout) && (
+      <>
+        <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+        <script type="application/ld+json" set:html={JSON.stringify(webSiteSchema)} />
+      </>
+    )}
+
+    <!-- Icons & manifest -->
     <link rel="icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,8 +108,6 @@ const { title = 'Shreyash Pandey' } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-
-    <title>{title} | AI Systems Engineer</title>
   </head>
   <body>
     <div class="pagewrap">

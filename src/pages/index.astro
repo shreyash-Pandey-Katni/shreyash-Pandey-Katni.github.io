@@ -9,13 +9,15 @@ import {
   flagshipProjects,
   workPrinciples,
   primaryContactHref,
+  pageMeta,
 } from '../data/siteContent';
 
 const featured = flagshipProjects.slice(0, 3);
 const { metrics, heroPanel, highlights } = homeContent;
+const { title, description } = pageMeta['/'];
 ---
 
-<BaseLayout title="Home">
+<BaseLayout title={title} description={description}>
   {/* ===== HERO ROW ===== */}
   <section class="page__section">
     <div class="bento reveal-stagger">

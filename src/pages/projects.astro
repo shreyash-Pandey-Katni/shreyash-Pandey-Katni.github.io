@@ -7,6 +7,7 @@ import {
   flagshipProjects,
   archiveProjects,
   siteMeta,
+  pageMeta,
 } from '../data/siteContent';
 
 /* Highlight known keywords with monospace styling */
@@ -31,9 +32,11 @@ function highlightKeywords(text: string) {
       : part
   ).join('');
 }
+
+const { title, description } = pageMeta['/projects'];
 ---
 
-<BaseLayout title="Projects">
+<BaseLayout title={title} description={description}>
   {/* ===== TITLE ROW ===== */}
   <section class="page__section">
     <div class="bento reveal-stagger">
