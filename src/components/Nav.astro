@@ -1,0 +1,101 @@
+---
+import { navigationLinks, primaryContactHref } from '../data/siteContent';
+
+const currentPath = new URL(Astro.request.url).pathname;
+---
+
+<nav class="nav" role="navigation" aria-label="Main">
+  <div class="nav__inner">
+    {/* Logo */}
+    <a href="/" class="nav__logo" aria-label="Home">
+      SP
+    </a>
+
+    {/* Desktop links */}
+    <div class="nav__links">
+      {navigationLinks.map((link) => {
+        const isActive = currentPath === link.path || (link.path === '/' && currentPath === '/');
+        return (
+          <a
+            href={link.path}
+            class={`nav__link${isActive ? ' nav__link--active' : ''}`}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+    </div>
+
+    <div class="nav__actions nav__actions--desktop">
+      {/* Desktop Resume */}
+      <a
+        href="/Shreyash_Pandey_Resume.pdf"
+        download
+        class="btn btn--secondary btn--sm"
+      >
+        Resume ↓
+      </a>
+
+      {/* Desktop CTA */}
+      <a href={primaryContactHref} class="nav__cta">
+        Get in touch
+      </a>
+    </div>
+
+    {/* Mobile hamburger */}
+    <button
+      class="nav__toggle"
+      onclick="this.classList.toggle('nav__toggle--open'); document.querySelector('.nav__overlay').classList.toggle('nav__overlay--open'); document.body.style.overflow = document.body.style.overflow ? '' : 'hidden';"
+      aria-expanded="false"
+      aria-label="Open menu"
+    >
+      <span class="nav__toggle-bar"></span>
+    </button>
+  </div>
+</nav>
+
+{/* Mobile overlay */}
+<div class="nav__overlay" aria-hidden="true">
+  {navigationLinks.map((link) => {
+    const isActive = currentPath === link.path || (link.path === '/' && currentPath === '/');
+    return (
+      <a
+        href={link.path}
+        class={`nav__overlay-link${isActive ? ' nav__overlay-link--active' : ''}`}
+        onclick="document.querySelector('.nav__toggle').classList.remove('nav__toggle--open'); document.querySelector('.nav__overlay').classList.remove('nav__overlay--open'); document.body.style.overflow = '';"
+      >
+        {link.label}
+      </a>
+    );
+  })}
+  <div class="nav__overlay-cta">
+    <a
+      href="/Shreyash_Pandey_Resume.pdf"
+      download
+      class="btn btn--secondary"
+      style="width: 100%; justify-content: center;"
+    >
+      Resume ↓
+    </a>
+    <a
+      href={primaryContactHref}
+      class="btn btn--primary"
+      style="width: 100%; justify-content: center;"
+    >
+      Get in touch
+    </a>
+  </div>
+</div>
+
+<script is:inline>
+  /* Smooth scroll to top on nav click */
+  document.querySelectorAll('.nav__overlay-link').forEach(link => {
+    link.addEventListener('click', () => {
+      setTimeout(() => window.scrollTo(0, 0), 0);
+    });
+  });
+</script>
+
+<style is:global>
+  /* Styles are in index.css */
+</style>

@@ -1,0 +1,31 @@
+---
+interface Props {
+  class?: string;
+  as?: string;
+  [key: string]: any;
+}
+
+const { class: className = '', as: Tag = 'div', ...rest } = Astro.props;
+---
+
+<Fragment>
+  {Tag === 'div' && (
+    <div class={`reveal ${className}`} {...rest}>
+      <slot />
+    </div>
+  )}
+  {Tag === 'section' && (
+    <section class={`reveal ${className}`} {...rest}>
+      <slot />
+    </section>
+  )}
+  {Tag === 'article' && (
+    <article class={`reveal ${className}`} {...rest}>
+      <slot />
+    </article>
+  )}
+</Fragment>
+
+<style>
+  /* Styles in index.css */
+</style>

@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import ActionLink from '../components/ActionLink.astro';
+import {
+  workContent,
+  experienceTimeline,
+  workPrinciples,
+  capabilityGroups,
+  primaryContactHref,
+} from '../data/siteContent';
+---
+
+<BaseLayout title="Work">
+  {/* ===== TITLE ===== */}
+  <section class="page__section">
+    <div class="bento">
+      <Reveal class="card span-4">
+        <p class="t-eyebrow card__eyebrow">{workContent.eyebrow}</p>
+        <h1 class="t-display card__title">{workContent.title}</h1>
+        <p class="t-body--lg" style="max-width: 640px;">
+          {workContent.intro}
+        </p>
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ===== EXPERIENCE TIMELINE ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      {experienceTimeline.map((exp, i) => {
+        const isDark = i === 0;
+        const span = i === 0 ? 'span-4' : 'span-2';
+
+        return (
+          <Reveal
+            class={`card ${span}${isDark ? ' card--dark' : ''}`}
+            key={exp.period}
+          >
+            <p class="t-eyebrow card__eyebrow">{exp.period}</p>
+            <h2 class="t-subheading card__title">{exp.role}</h2>
+            <p class="t-small" style="margin-bottom: 12px;">
+              {exp.company} · {exp.location}
+            </p>
+            <p class="t-body card__body">{exp.summary}</p>
+            <ul class="achievement-list">
+              {exp.achievements.map((a, j) => (
+                <li key={j}>{a}</li>
+              ))}
+            </ul>
+          </Reveal>
+        );
+      })}
+    </div>
+  </section>
+
+  {/* ===== HOW I OPERATE ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 16px;">How I operate</p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {workPrinciples.map((p) => (
+        <Reveal class="card" key={p.title}>
+          <h3 class="t-subheading card__title">{p.title}</h3>
+          <p class="t-body">{p.description}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== CAPABILITY MAP ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 16px;">Capability map</p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {capabilityGroups.map((group, idx) => (
+        <Reveal
+          class={`card${idx === 0 ? ' span-2' : ''}`}
+          key={group.title}
+        >
+          <h3 class="t-subheading card__title">{group.title}</h3>
+          <div class="chip-grid">
+            {group.items.map((item) => (
+              <span class="chip chip--outline" key={item}>{item}</span>
+            ))}
+          </div>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== CTA ===== */}
+  <section class="page__section">
+    <Reveal class="card card--accent" style="text-align: center; padding: 48px 32px;">
+      <p class="t-eyebrow card__eyebrow" style="color: rgba(255,255,255,0.6);">
+        Interested in working together?
+      </p>
+      <h2 class="t-heading card__title" style="color: #fff;">
+        Let's discuss role fit
+      </h2>
+      <p class="t-body card__body" style="max-width: 480px; margin: 0 auto 24px; color: rgba(255,255,255,0.85);">
+        I am most interested in roles where AI systems, backend engineering, and reliability work intersect.
+      </p>
+      <ActionLink
+        href={primaryContactHref}
+        label="Get in touch →"
+        variant="ghost"
+        class="btn--on-accent"
+      />
+    </Reveal>
+  </section>
+</BaseLayout>

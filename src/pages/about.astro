@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import ActionLink from '../components/ActionLink.astro';
+import {
+  aboutContent,
+  skillGroups,
+  certifications,
+  siteMeta,
+  socialLinks,
+  primaryContactHref,
+} from '../data/siteContent';
+
+const { intro, secondary, values, outsideWork, education } = aboutContent;
+---
+
+<BaseLayout title="About">
+  {/* ===== INTRO ROW ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      {/* Intro — span 3 */}
+      <Reveal class="card span-3">
+        <p class="t-eyebrow card__eyebrow">{aboutContent.eyebrow}</p>
+        <h1 class="t-display card__title">{aboutContent.title}</h1>
+        <p class="t-body--lg card__body">{intro}</p>
+        <p class="t-body">{secondary}</p>
+      </Reveal>
+
+      {/* Education — dark, span 1 */}
+      <Reveal class="card card--dark span-1">
+        <p class="t-eyebrow card__eyebrow">Education</p>
+        <h3 class="t-subheading card__title" style="color: #fff; font-size: 1rem;">
+          {education.school}
+        </h3>
+        <p class="t-small" style="color: rgba(255,255,255,0.6);">
+          {education.degree}
+        </p>
+        <p class="t-small" style="color: rgba(255,255,255,0.5);">
+          {education.years}
+        </p>
+        <p class="t-small" style="color: rgba(255,255,255,0.5); margin-top: 8px;">
+          {education.detail}
+        </p>
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ===== VALUES ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 16px;">What I value</p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {values.map((v, i) => (
+        <Reveal
+          class={`card${i === 2 ? ' span-2' : ''}`}
+          key={v.title}
+        >
+          <h3 class="t-subheading card__title">{v.title}</h3>
+          <p class="t-body">{v.description}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== SKILLS + CERTS + CTA ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      {/* Skills — span 2 */}
+      <Reveal class="card span-2">
+        <p class="t-eyebrow card__eyebrow">Technical skills</p>
+        <div class="flow--lg">
+          {skillGroups.map((group) => (
+            <div key={group.title}>
+              <h4 class="t-small" style="color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+                {group.title}
+              </h4>
+              <div class="chip-grid">
+                {group.items.map((item) => (
+                  <span class="chip chip--outline" key={item}>{item}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* Certifications — span 1 */}
+      <Reveal class="card">
+        <p class="t-eyebrow card__eyebrow">Certifications</p>
+        <ul class="flow">
+          {certifications.map((cert) => (
+            <li key={cert} class="t-small" style="color: var(--text-secondary);">
+              {cert}
+            </li>
+          ))}
+        </ul>
+      </Reveal>
+
+      {/* Contact CTA — accent, span 1 */}
+      <Reveal class="card card--accent" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <p class="t-eyebrow card__eyebrow" style="color: rgba(255,255,255,0.6);">
+            Let's connect
+          </p>
+          <h3 class="t-subheading card__title" style="color: #fff;">
+            Open to opportunities
+          </h3>
+          <p class="t-small" style="color: rgba(255,255,255,0.8);">
+            I'm looking for roles at the intersection of AI systems, backend engineering, and reliability.
+          </p>
+        </div>
+        <div class="card__footer">
+          <ActionLink
+            href={primaryContactHref}
+            label="Get in touch →"
+            variant="ghost"
+            class="btn--on-accent"
+          />
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ===== OUTSIDE WORK + SOCIALS ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      {/* Outside work — span 2 */}
+      <Reveal class="card span-2">
+        <p class="t-eyebrow card__eyebrow">Outside work</p>
+        <ul class="flow">
+          {outsideWork.map((item, i) => (
+            <li key={i} class="t-body">{item}</li>
+          ))}
+        </ul>
+      </Reveal>
+
+      {/* Social links — span 2 */}
+      <Reveal class="card span-2">
+        <p class="t-eyebrow card__eyebrow">Find me online</p>
+        <div class="social-row" style="margin-top: 12px;">
+          {socialLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              class="social-item"
+            >
+              {link.name} <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+        <div style="margin-top: 20px;">
+          <ActionLink
+            href={siteMeta.topmate}
+            external={true}
+            label="Book a session on Topmate"
+            variant="secondary"
+            small={true}
+          />
+        </div>
+      </Reveal>
+    </div>
+  </section>
+</BaseLayout>

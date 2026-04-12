@@ -1,0 +1,59 @@
+---
+import Nav from '../components/Nav.astro';
+import '../styles/index.css';
+
+interface Props {
+  title?: string;
+  eyebrow?: string;
+}
+
+const { title = 'Shreyash Pandey' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#F2F0ED" />
+    <meta
+      name="description"
+      content="Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering."
+    />
+    <link rel="icon" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>{title} | AI Systems Engineer</title>
+  </head>
+  <body>
+    <div class="pagewrap">
+      <Nav />
+      <main class="page shell">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      /* Scroll reveal handler */
+      const reveals = document.querySelectorAll('.reveal');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+
+      reveals.forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

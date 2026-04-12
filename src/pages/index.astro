@@ -1,0 +1,192 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import ActionLink from '../components/ActionLink.astro';
+import {
+  homeContent,
+  siteMeta,
+  experienceTimeline,
+  flagshipProjects,
+  workPrinciples,
+  primaryContactHref,
+} from '../data/siteContent';
+
+const featured = flagshipProjects.slice(0, 3);
+const { metrics, heroPanel, highlights } = homeContent;
+---
+
+<BaseLayout title="Home">
+  {/* ===== HERO ROW ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      {/* Hero card — span 3 */}
+      <Reveal class="card span-3">
+        <p class="t-eyebrow card__eyebrow">{homeContent.eyebrow}</p>
+        <h1 class="t-display card__title">{homeContent.title}</h1>
+        <p class="t-body--lg card__body" style="max-width: 640px;">
+          {homeContent.lede}
+        </p>
+        <div class="btn-row">
+          <ActionLink to="/work" variant="primary" label="View my work" />
+          <ActionLink href={primaryContactHref} variant="secondary" label="Get in touch" />
+        </div>
+      </Reveal>
+
+      {/* Proof surface — span 1, dark, tall */}
+      <Reveal class="card card--dark span-1 row-2">
+        <p class="t-eyebrow card__eyebrow">{heroPanel.eyebrow}</p>
+        <p class="t-small" style="margin-bottom: 20px; color: rgba(255,255,255,0.6);">
+          {heroPanel.summary}
+        </p>
+        {heroPanel.proofs.map((p) => (
+          <div class="proof-item" key={p.label}>
+            <div class="proof-label">{p.label}</div>
+            <div class="proof-value">{p.value}</div>
+            <div class="proof-detail">{p.detail}</div>
+          </div>
+        ))}
+      </Reveal>
+
+      {/* Highlight pills — span 3 */}
+      <Reveal class="card card--compact span-3">
+        <div class="chip-grid">
+          {highlights.map((h) => (
+            <span class="chip" key={h}>{h}</span>
+          ))}
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ===== METRICS ROW ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      {metrics.map((m) => (
+        <Reveal class="card card--stat" key={m.label}>
+          <span class="stat-value">{m.value}</span>
+          <span class="stat-label">{m.label}</span>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== FOCUS + PRINCIPLES ===== */}
+  <section class="page__section">
+    <div class="bento reveal-stagger">
+      <Reveal class="card span-2">
+        <p class="t-eyebrow card__eyebrow">What I optimize for</p>
+        <p class="t-body--lg card__body">{homeContent.focusIntro}</p>
+      </Reveal>
+      {workPrinciples.slice(0, 2).map((p) => (
+        <Reveal class="card" key={p.title}>
+          <h3 class="t-subheading card__title">{p.title}</h3>
+          <p class="t-small">{p.description}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== EXPERIENCE SNAPSHOT ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 16px;">Systems I have shipped</p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {experienceTimeline.map((exp, i) => (
+        <Reveal
+          class={`card${i === 0 ? ' card--dark span-2' : ''}`}
+          key={exp.period}
+        >
+          <p class="t-eyebrow card__eyebrow">{exp.period}</p>
+          <h3 class="t-subheading card__title">
+            {exp.role}
+          </h3>
+          <p class="t-small" style="margin-bottom: 12px;">
+            {exp.company} · {exp.location}
+          </p>
+          <p class="t-body card__body">{exp.summary}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== FEATURED PROJECTS ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 16px;">Current projects</p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {featured.map((proj, i) => (
+        <Reveal
+          class={`card${i === 0 ? ' card--dark span-2' : ''} card--interactive`}
+          key={proj.title}
+        >
+          <p class="t-eyebrow card__eyebrow">
+            {proj.year} · {proj.category}
+          </p>
+          <h3 class="t-subheading card__title">{proj.title}</h3>
+          <p class="t-body card__body">{proj.summary}</p>
+          <div class="chip-grid" style="margin-bottom: 16px;">
+            {proj.skills.slice(0, 3).map((s) => (
+              <span class={`chip${i === 0 ? ' chip--dark' : ''}`} key={s}>{s}</span>
+            ))}
+          </div>
+          {proj.href && (
+            <ActionLink
+              href={proj.href}
+              external={true}
+              label={proj.ctaLabel || 'View project'}
+              variant="ghost"
+              small={true}
+              class={i === 0 ? 'btn--on-dark' : ''}
+            />
+          )}
+        </Reveal>
+      ))}
+
+      {/* CTA card */}
+      <Reveal class="card card--accent">
+        <p class="t-eyebrow card__eyebrow" style="color: rgba(255,255,255,0.6);">
+          See all builds
+        </p>
+        <h3 class="t-subheading card__title" style="color: #fff;">
+          Explore the full project portfolio
+        </h3>
+        <div class="card__footer">
+          <ActionLink
+            to="/projects"
+            label="All projects →"
+            variant="ghost"
+            class="btn--on-accent"
+          />
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ===== BOTTOM CTA ===== */}
+  <section class="page__section">
+    <Reveal class="card card--dark span-4" style="text-align: center; padding: 48px 32px;">
+      <p class="t-eyebrow card__eyebrow">Looking for my next role</p>
+      <h2 class="t-heading card__title" style="color: #fff;">
+        {siteMeta.role} based in {siteMeta.location}
+      </h2>
+      <p class="t-body card__body" style="max-width: 540px; margin: 0 auto 24px; color: rgba(255,255,255,0.7);">
+        {siteMeta.contactBlurb}
+      </p>
+      <div class="btn-row" style="justify-content: center;">
+        <ActionLink
+          href={primaryContactHref}
+          label="Get in touch"
+          variant="accent"
+        />
+        <ActionLink
+          to="/about"
+          label="More about me"
+          variant="ghost"
+          class="btn--on-dark"
+        />
+      </div>
+    </Reveal>
+  </section>
+</BaseLayout>
