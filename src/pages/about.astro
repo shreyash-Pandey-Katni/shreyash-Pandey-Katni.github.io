@@ -54,7 +54,6 @@ const { intro, secondary, values, outsideWork, education } = aboutContent;
       {values.map((v, i) => (
         <Reveal
           class={`card${i === 2 ? ' span-2' : ''}`}
-          key={v.title}
         >
           <h3 class="t-subheading card__title">{v.title}</h3>
           <p class="t-body">{v.description}</p>
@@ -71,13 +70,13 @@ const { intro, secondary, values, outsideWork, education } = aboutContent;
         <p class="t-eyebrow card__eyebrow">Technical skills</p>
         <div class="flow--lg">
           {skillGroups.map((group) => (
-            <div key={group.title}>
+            <div>
               <h4 class="t-small" style="color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
                 {group.title}
               </h4>
               <div class="chip-grid">
                 {group.items.map((item) => (
-                  <span class="chip chip--outline" key={item}>{item}</span>
+                  <span class="chip chip--outline">{item}</span>
                 ))}
               </div>
             </div>
@@ -90,7 +89,7 @@ const { intro, secondary, values, outsideWork, education } = aboutContent;
         <p class="t-eyebrow card__eyebrow">Certifications</p>
         <ul class="flow">
           {certifications.map((cert) => (
-            <li key={cert} class="t-small" style="color: var(--text-secondary);">
+            <li class="t-small" style="color: var(--text-secondary);">
               {cert}
             </li>
           ))}
@@ -129,8 +128,8 @@ const { intro, secondary, values, outsideWork, education } = aboutContent;
       <Reveal class="card span-2">
         <p class="t-eyebrow card__eyebrow">Outside work</p>
         <ul class="flow">
-          {outsideWork.map((item, i) => (
-            <li key={i} class="t-body">{item}</li>
+          {outsideWork.map((item) => (
+            <li class="t-body">{item}</li>
           ))}
         </ul>
       </Reveal>
@@ -141,7 +140,6 @@ const { intro, secondary, values, outsideWork, education } = aboutContent;
         <div class="social-row" style="margin-top: 12px;">
           {socialLinks.map((link) => (
             <a
-              key={link.name}
               href={link.href}
               target="_blank"
               rel="noreferrer"

@@ -25,7 +25,7 @@ function highlightKeywords(text: string) {
   );
   const regex = new RegExp(`(${escaped.join('|')})`, 'g');
   const parts = text.split(regex);
-  return parts.map((part, i) =>
+  return parts.map((part) =>
     KW_PATTERNS.includes(part)
       ? `<span class="kw">${part}</span>`
       : part
@@ -58,7 +58,8 @@ function highlightKeywords(text: string) {
     <div class="bento reveal-stagger">
       {flagshipProjects.map((proj, i) => {
         const isDark = i === 0 || i === 3;
-        const isWide = i === 0 || i === 2;
+        // Keep row balance in 4-col grid: first row 2+2, second row 1+1+2.
+        const isWide = i === 0 || i === 1 || i === 4;
         const spanClass = isWide ? 'span-2' : '';
         const isModelCard = proj.ctaLabel === 'View model card';
         const ctaVariant = isDark ? 'ghost' : isModelCard ? 'accent' : 'ghost';
@@ -67,7 +68,6 @@ function highlightKeywords(text: string) {
         return (
           <Reveal
             class={`card ${spanClass}${isDark ? ' card--dark' : ''} card--interactive`}
-            key={proj.title}
           >
             <p class="t-eyebrow card__eyebrow">
               {proj.year} · {proj.category}
@@ -93,7 +93,7 @@ function highlightKeywords(text: string) {
             {/* Skills */}
             <div class="chip-grid" style={proj.href ? 'margin-bottom: 16px;' : ''}>
               {proj.skills.map((s) => (
-                <span class={`chip${isDark ? ' chip--dark' : ' chip--outline'}`} key={s}>
+                <span class={`chip${isDark ? ' chip--dark' : ' chip--outline'}`}>
                   {s}
                 </span>
               ))}
@@ -128,7 +128,7 @@ function highlightKeywords(text: string) {
     </Reveal>
     <div class="bento reveal-stagger">
       {archiveProjects.map((proj) => (
-        <Reveal class="card card--compact card--ghost" key={proj.title}>
+        <Reveal class="card card--compact card--ghost">
           <p class="t-eyebrow card__eyebrow">{proj.period}</p>
           <h3 class="t-subheading card__title" style="font-size: 1rem;">
             {proj.title}
