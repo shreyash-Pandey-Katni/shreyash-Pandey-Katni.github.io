@@ -1,14 +1,14 @@
 ---
 import { navigationLinks, primaryContactHref } from '../data/siteContent';
 
-const currentPath = new URL(Astro.request.url).pathname;
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 ---
 
 <nav class="nav" role="navigation" aria-label="Main">
   <div class="nav__inner">
     {/* Logo */}
     <a href="/" class="nav__logo" aria-label="Home">
-      SP
+      <img src="/icon.svg" alt="Shreyash Pandey" class="nav__avatar" />
     </a>
 
     {/* Desktop links */}

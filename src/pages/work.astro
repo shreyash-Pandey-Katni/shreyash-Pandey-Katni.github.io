@@ -35,7 +35,6 @@ import {
         return (
           <Reveal
             class={`card ${span}${isDark ? ' card--dark' : ''}`}
-            key={exp.period}
           >
             <p class="t-eyebrow card__eyebrow">{exp.period}</p>
             <h2 class="t-subheading card__title">{exp.role}</h2>
@@ -44,8 +43,8 @@ import {
             </p>
             <p class="t-body card__body">{exp.summary}</p>
             <ul class="achievement-list">
-              {exp.achievements.map((a, j) => (
-                <li key={j}>{a}</li>
+              {exp.achievements.map((a) => (
+                <li>{a}</li>
               ))}
             </ul>
           </Reveal>
@@ -61,7 +60,7 @@ import {
     </Reveal>
     <div class="bento reveal-stagger">
       {workPrinciples.map((p) => (
-        <Reveal class="card" key={p.title}>
+        <Reveal class="card">
           <h3 class="t-subheading card__title">{p.title}</h3>
           <p class="t-body">{p.description}</p>
         </Reveal>
@@ -78,12 +77,11 @@ import {
       {capabilityGroups.map((group, idx) => (
         <Reveal
           class={`card${idx === 0 ? ' span-2' : ''}`}
-          key={group.title}
         >
           <h3 class="t-subheading card__title">{group.title}</h3>
           <div class="chip-grid">
             {group.items.map((item) => (
-              <span class="chip chip--outline" key={item}>{item}</span>
+              <span class="chip chip--outline">{item}</span>
             ))}
           </div>
         </Reveal>
