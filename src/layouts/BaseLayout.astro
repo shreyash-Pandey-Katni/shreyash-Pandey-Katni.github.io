@@ -108,6 +108,15 @@ const webPageSchema = {
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Anti-FOUC: apply saved/preferred theme before first paint -->
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem('theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
   </head>
   <body>
     <div class="pagewrap">
@@ -128,8 +137,26 @@ const webPageSchema = {
           }
         });
       }, { threshold: 0.08 });
-
       reveals.forEach((el) => observer.observe(el));
+
+      /* Theme toggle */
+      const THEME_KEY = 'theme';
+      const root = document.documentElement;
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+      function setTheme(t) {
+        root.classList.add('theme-changing');
+        root.setAttribute('data-theme', t);
+        localStorage.setItem(THEME_KEY, t);
+        if (themeMeta) themeMeta.content = t === 'dark' ? '#0F0F10' : '#F2F0ED';
+        setTimeout(() => root.classList.remove('theme-changing'), 400);
+      }
+
+      document.querySelectorAll('.theme-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        });
+      });
     </script>
   </body>
 </html>
