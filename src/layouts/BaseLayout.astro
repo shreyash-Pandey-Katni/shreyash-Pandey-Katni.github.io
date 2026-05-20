@@ -143,19 +143,31 @@ const webPageSchema = {
       const THEME_KEY = 'theme';
       const root = document.documentElement;
       const themeMeta = document.querySelector('meta[name="theme-color"]');
+      const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
 
-      function setTheme(t) {
+      // Apply a theme visually — does NOT persist to localStorage.
+      function applyTheme(t) {
         root.classList.add('theme-changing');
         root.setAttribute('data-theme', t);
-        localStorage.setItem(THEME_KEY, t);
         if (themeMeta) themeMeta.content = t === 'dark' ? '#0F0F10' : '#F2F0ED';
         setTimeout(() => root.classList.remove('theme-changing'), 400);
       }
 
+      // Toggle button: user explicitly picks → save and apply.
       document.querySelectorAll('.theme-toggle').forEach((btn) => {
         btn.addEventListener('click', () => {
-          setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+          const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          localStorage.setItem(THEME_KEY, next);
+          applyTheme(next);
         });
+      });
+
+      // If the OS theme changes and the user has NOT manually overridden,
+      // follow the system automatically.
+      sysDark.addEventListener('change', (e) => {
+        if (!localStorage.getItem(THEME_KEY)) {
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
       });
     </script>
   </body>
