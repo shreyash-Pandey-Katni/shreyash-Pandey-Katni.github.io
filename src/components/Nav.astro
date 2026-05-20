@@ -57,7 +57,12 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
       </a>
 
       {/* Desktop CTA */}
-      <a href={primaryContactHref} class="nav__cta">
+      <a
+        href={primaryContactHref}
+        class="nav__cta"
+        data-copy-email="shreyash.pandey.katni@gmail.com"
+        title="Click to copy email"
+      >
         Get in touch
       </a>
     </div>
@@ -119,6 +124,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
       href={primaryContactHref}
       class="btn btn--primary"
       style="width: 100%; justify-content: center;"
+      data-copy-email="shreyash.pandey.katni@gmail.com"
+      title="Click to copy email"
     >
       Get in touch
     </a>
