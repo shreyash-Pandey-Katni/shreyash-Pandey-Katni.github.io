@@ -94,7 +94,7 @@ const { title, description } = pageMeta['/projects'];
             </p>
 
             {/* Skills */}
-            <div class="chip-grid" style={proj.href ? 'margin-bottom: 16px;' : ''}>
+            <div class="chip-grid" style="margin-bottom: 16px;">
               {proj.skills.map((s) => (
                 <span class={`chip${isDark ? ' chip--dark' : ' chip--outline'}`}>
                   {s}
@@ -103,18 +103,25 @@ const { title, description } = pageMeta['/projects'];
             </div>
 
             {/* CTA */}
-            {proj.href && (
-              <div class="card__footer">
+            <div class="card__footer" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <ActionLink
+                href={`/projects/${proj.slug}`}
+                label="View details →"
+                variant={ctaVariant}
+                small={true}
+                class={ctaClass}
+              />
+              {proj.href && (
                 <ActionLink
                   href={proj.href}
                   external={true}
                   label={proj.ctaLabel || 'View project'}
-                  variant={ctaVariant}
+                  variant="ghost"
                   small={true}
                   class={ctaClass}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </Reveal>
         );
       })}
