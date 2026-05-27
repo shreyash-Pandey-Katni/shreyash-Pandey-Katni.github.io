@@ -503,27 +503,27 @@ export const flagshipProjects = [
     architecture: [
       {
         name: "6-Tier Pipeline",
-        description: "Tier 1 Knowledge Pipeline (ingestion → extraction → thesis building → dedup → backtest queue) → Tier 2 Backtesting Engine (walk-forward, Monte Carlo, portfolio-level) → Tier 3 Daily Screening (regime → news → scanner → fundamental filter → supervisor) → Tier 4 Graph Reasoning (GraphRAG → subgraph narrator → causal chains → historical analogues) → Tier 5 Live Monitoring (position monitor, Elo updater, risk concentration, drawdown protection) → Tier 6 Output (ranked signals, dummy trades, dashboard, Telegram, trade journal).",
+        description: "Knowledge Pipeline (ingestion → extraction → thesis building → dedup → backtest queue) → Backtesting Engine (walk-forward, Monte Carlo, portfolio-level) → Daily Screening (regime → news → scanner → fundamental filter → supervisor) → Graph Reasoning (GraphRAG → subgraph narrator → causal chains → historical analogues) → Live Monitoring (position monitor, Elo updater, risk, drawdown) → Output (ranked signals, dummy trades, dashboard, Telegram, trade journal).",
       },
       {
-        name: "Neo4j Knowledge Graph — 6 Layers",
-        description: "Ontology layer (indicator taxonomy), Knowledge layer (Thesis + Principle registry with Elo scores and backtest metrics), Market Structure layer (600-stock company dependency graph with causal chains and propagation weights), Temporal layer (time-stamped confidence, alpha decay tracking), Event layer (historical event chains: Covid, Ukraine, Iran — which theses worked/failed), and Decision layer (every agent verdict stored as a queryable reasoning audit trail). 20 node types, 25 edge types.",
+        name: "59-Agent Swarm — 7 Layers",
+        description: "Ingestion (7): knowledge, fundamental, news, BSE, spaCy NER, scipy stats, NER retraining. Knowledge (9): quality gate, thesis builder, Qdrant dedup, KG generation, subgraph narrator. Analysis (5): regime, fundamental filter, signal. Signal (7): scanner, momentum, trend, entry/exit. Infrastructure (14): GPU manager, orchestrator, health, risk, drawdown, Elo updater, paper trading, Telegram. Validation (3) + Additional (10). Each agent has a fixed LLM, temperature, and output contract.",
       },
       {
         name: "GraphRAG Reasoning Engine",
-        description: "Agents never receive raw Cypher output. A 4-layer pipeline converts graph data into LLM-readable context: GraphRAG multi-hop traversal (max 3 hops, confidence-weighted) → Mistral 7B Subgraph Narrator (dependency chains, causal lags, conflict flags, historical analogues, ≤2,000 tokens) → 7-step Chain-of-Thought reasoning template (regime check → dependency scan → conflict resolution → propagation → historical analogue → confidence score → TRADE/WATCH/SKIP) → Verification Agent (extracts factual claims, checks every claim against Neo4j via Cypher, logs hallucination rate per agent, Telegram alert above 15%).",
-      },
-      {
-        name: "Rust + Chronicle Queue Hot Path",
-        description: "Single WebSocket connection to Dhan broker feeds Chronicle Queue (memory-mapped file log, sub-microsecond reads, built-in replay). Rust process distributes ticks to all consumers — live trading, dummy trading, backtesting — from one connection. Eliminates Python's 5–15ms GIL overhead and broker connection limit exhaustion. <5μs end-to-end tick-to-consumer latency. Architecture decision driven by real production pain points, not technology preference.",
-      },
-      {
-        name: "59-Agent Swarm across 7 Layers",
-        description: "Ingestion (7): knowledge, fundamental, news, BSE announcements, spaCy NER, scipy stats, NER retraining. Knowledge (9): quality gate, thesis builder, deduplication via Qdrant cosine similarity, KG generation, subgraph narrator. Analysis (5): regime detection, fundamental filter, signal generation. Signal (7): scanner, momentum, trend, entry/exit calculation. Infrastructure (14): GPU manager, orchestrator, health check, risk concentration, drawdown protection, thesis Elo updater, paper trading, Telegram notifier. Validation (3): hallucination verifier, backtest registry, data quality monitor. Additional (10): bootstrap orchestrator, thesis optimizer, API rate limiter, replay runner.",
+        description: "Agents never receive raw Cypher output. GraphRAG multi-hop traversal (max 3 hops, confidence-weighted) → Mistral 7B Subgraph Narrator (dependency chains, causal lags, conflict flags, ≤2K tokens) → 7-step CoT template (regime → dependency → propagation → analogue → confidence → TRADE/WATCH/SKIP) → Verification Agent checks every LLM claim against Neo4j; Telegram alert if hallucination rate exceeds 15%.",
       },
       {
         name: "3-Machine K3s Cluster",
-        description: "M1 (RTX 3080 Ti, 12GB VRAM, 32GB RAM) — primary compute: LangGraph orchestrator, Qwen2.5 14B via Ollama, VectorBT GPU backtesting, morning pipeline. M2 (A1000, 6GB VRAM, 32GB RAM) — secondary compute: Mistral 7B, KG generation, news ingestion, scipy stats. M3 (T600, 4GB VRAM, 32GB RAM) — storage + orchestration: PostgreSQL, Neo4j, Qdrant, Redis, Streamlit, Telegram bot. Ceph distributed storage with replication factor 2 across all 3 nodes (~230GB used). Total cluster VRAM: 22GB.",
+        description: "M1 (RTX 3080 Ti, 12 GB) — primary: LangGraph orchestrator, Qwen2.5 14B, VectorBT GPU backtesting. M2 (A1000, 6 GB) — secondary: Mistral 7B, KG generation, news ingestion. M3 (T600, 4 GB) — storage: PostgreSQL, Neo4j, Qdrant, Redis, Streamlit, Telegram bot. Ceph replication factor 2 across all three nodes (~230 GB used). Total cluster VRAM: 22 GB.",
+      },
+      {
+        name: "Neo4j Knowledge Graph — 6 Layers",
+        description: "Ontology (indicator taxonomy), Knowledge (Thesis + Principle registry with Elo scores and backtest metrics), Market Structure (600-stock company dependency graph, causal chains, propagation weights), Temporal (time-stamped confidence, alpha decay), Event (historical chains: Covid, Ukraine — which theses worked/failed), Decision (every agent verdict as a queryable audit trail). 20 node types, 25 edge types.",
+      },
+      {
+        name: "Rust + Chronicle Queue Hot Path",
+        description: "Single Dhan WebSocket feeds Chronicle Queue (memory-mapped, sub-µs reads, built-in replay). Rust distributes ticks to live, dummy, and backtest consumers from one connection. Eliminates Python's 5–15ms GIL floor and broker connection exhaustion. Under 5µs end-to-end. Driven by real production pain points, not technology preference.",
       },
     ],
     techStack: {
