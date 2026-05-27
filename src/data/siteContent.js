@@ -187,13 +187,13 @@ export const flagshipProjects = [
     slug: "phoenix-125m",
     category: "Decoder-only language model",
     status: "Released",
-    tagline: "A 125M parameter LLM trained end-to-end on a single RTX 3080 Ti — corpus to checkpoint.",
+    tagline: "A 125M parameter LLM trained end-to-end on a single RTX 3080 Ti, from corpus to checkpoint.",
     summary:
       "A LLaMA-style 125M parameter model trained from scratch on a single RTX 3080 Ti with a custom tokenizer, data pipeline, and training loop.",
     details:
       "The project is an end-to-end exercise in model building: corpus curation, tokenization, training stability, benchmarking, and open-source packaging.",
     proof: "~2B tokens processed, Apache 2.0 release, WinoGrande 0.507.",
-    why: "I wanted to learn how LLMs actually work — not from an API, but by building one end-to-end. With a single 3080 Ti, training a 125M model from scratch was the right scope: ambitious enough to be real, small enough to be feasible on consumer hardware. Every decision — architecture, data pipeline, training stability — was a lesson I could not have learned any other way.",
+    why: "I wanted to learn how LLMs actually work, not from an API, but by building one end-to-end. With a single 3080 Ti, training a 125M model from scratch was the right scope: ambitious enough to be real, small enough to be feasible on consumer hardware. Every decision, from architecture to data pipeline to training stability, was a lesson I could not have learned any other way.",
     skills: ["PyTorch", "Transformers", "Tokenization", "Benchmarking", "Distributed training"],
     href: "https://huggingface.co/shreyash-Pandey-Katni/phoenix-125m",
     ctaLabel: "View model card",
@@ -204,20 +204,100 @@ export const flagshipProjects = [
     ],
     architecture: [
       {
-        name: "Data Pipeline — 7 stages",
-        description: "Download from HuggingFace and AIKosh → PDF/HTML text extraction via PyMuPDF and BeautifulSoup → XLM-RoBERTa language detection and PII redaction → MinHash LSH deduplication → corpus mixing by source ratio → BPE tokenizer training (32K vocab) → uint16 binary shard output for memory-mapped loading.",
+        name: "Data Pipeline: 7 stages",
+        span: 4,
+        dark: true,
+        html: `<ol class="flow-steps">
+  <li class="flow-step">
+    <div class="flow-step__num">01</div>
+    <div class="flow-step__body">
+      <h4>Download</h4>
+      <p>Fetch from HuggingFace and AIKosh. Validate sources and write to raw corpus directory.</p>
+      <div class="flow-step__tags"><span>HuggingFace</span><span>AIKosh</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">02</div>
+    <div class="flow-step__body">
+      <h4>Extract</h4>
+      <p>PDF text via PyMuPDF, HTML via BeautifulSoup. Structured text out, noise stripped.</p>
+      <div class="flow-step__tags"><span>PyMuPDF</span><span>BeautifulSoup</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">03</div>
+    <div class="flow-step__body">
+      <h4>Detect and Redact</h4>
+      <p>XLM-RoBERTa language detection filters non-English. PII patterns redacted before any training.</p>
+      <div class="flow-step__tags"><span>XLM-RoBERTa</span><span>PII redaction</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">04</div>
+    <div class="flow-step__body">
+      <h4>Deduplicate</h4>
+      <p>MinHash LSH deduplication across the full corpus by n-gram signature. Near-duplicates removed.</p>
+      <div class="flow-step__tags"><span>MinHash LSH</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">05</div>
+    <div class="flow-step__body">
+      <h4>Mix</h4>
+      <p>Corpus blended by source ratio: Wikipedia, C4-en, OpenWebText2, Gutenberg, StackExchange, ArXiv.</p>
+      <div class="flow-step__tags"><span>source mixing</span><span>domain balance</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">06</div>
+    <div class="flow-step__body">
+      <h4>Tokenize</h4>
+      <p>BPE tokenizer trained on the mixed corpus. 32K vocab, byte-level fallback, special tokens added.</p>
+      <div class="flow-step__tags"><span>BPE 32K</span><span>byte-level</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">07</div>
+    <div class="flow-step__body">
+      <h4>Shard</h4>
+      <p>uint16 binary shard output for memory-mapped loading during training. No full corpus in RAM.</p>
+      <div class="flow-step__tags"><span>uint16 shards</span><span>memory-mapped</span></div>
+    </div>
+  </li>
+</ol>`,
       },
       {
         name: "Model",
-        description: "Decoder-only transformer: RoPE positional encoding, SwiGLU activations, RMSNorm (pre-norm), PyTorch 2.x FlashAttention, and weight-tied input/output embeddings. 125M parameters across 12 layers, 12 heads, d_model=768, bf16 precision.",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>RoPE</strong> · rotary positional encoding</span></li>
+  <li><span><strong>SwiGLU</strong> · gated activation, no ReLU</span></li>
+  <li><span><strong>RMSNorm</strong> · pre-norm, no bias</span></li>
+  <li><span><strong>FlashAttention</strong> · PyTorch 2.x kernel</span></li>
+  <li><span><strong>12L / 12H / d768</strong> · 125M parameters</span></li>
+  <li><span><strong>bf16</strong> · weight-tied in/out embeddings</span></li>
+</ul>`,
       },
       {
         name: "Training Loop",
-        description: "bf16 mixed precision, gradient checkpointing to fit 12 GB VRAM, cosine LR schedule with warmup, gradient clipping at 1.0, AdamW optimizer. Checkpoints every 1K steps to NAS via SMB.",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Precision</strong> · bf16 mixed precision throughout</span></li>
+  <li><span><strong>Memory</strong> · gradient checkpointing to fit 12 GB VRAM</span></li>
+  <li><span><strong>Schedule</strong> · cosine LR with linear warmup</span></li>
+  <li><span><strong>Stability</strong> · gradient clipping at 1.0, AdamW optimizer</span></li>
+  <li><span><strong>Checkpoints</strong> · every 1,000 steps to NAS via SMB</span></li>
+</ul>`,
       },
       {
         name: "Evaluation Harness",
-        description: "Perplexity on WikiText-103. Zero-shot benchmarks implemented from scratch: HellaSwag (normalized), WinoGrande, ARC-Easy, LAMBADA accuracy, PIQA substitute — matching lm-evaluation-harness conventions.",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>Perplexity</strong> · WikiText-103 held-out set</span></li>
+  <li><span><strong>HellaSwag</strong> · normalized, zero-shot</span></li>
+  <li><span><strong>WinoGrande</strong> · commonsense reasoning</span></li>
+  <li><span><strong>ARC-Easy</strong> · science QA, 570 samples</span></li>
+  <li><span><strong>LAMBADA</strong> · long-range accuracy</span></li>
+  <li><span><strong>PIQA</strong> · physical intuition substitute</span></li>
+</ul>
+<p class="bullet-list__meta">All benchmarks implemented from scratch, matching lm-evaluation-harness conventions</p>`,
       },
       {
         name: "HuggingFace Export",
@@ -230,9 +310,9 @@ export const flagshipProjects = [
       tools: ["MinHash LSH dedup", "XLM-RoBERTa (lang detect + PII)", "PyMuPDF", "BeautifulSoup"],
     },
     highlights: [
-      "Trained a 125M parameter LLM from scratch on a single consumer GPU — no cloud, no distributed training.",
+      "Trained a 125M parameter LLM from scratch on a single consumer GPU. No cloud, no distributed training.",
       "Built a 7-stage data pipeline processing ~2B tokens from Wikipedia, C4-en, OpenWebText2, Project Gutenberg, StackExchange, and ArXiv.",
-      "WinoGrande score of 0.507 — above random chance (0.50), showing the model captures basic commonsense structure.",
+      "WinoGrande score of 0.507: above random chance (0.50), showing the model captures basic commonsense structure.",
       "Released under Apache 2.0 on HuggingFace with full model card, tokenizer, and inference examples.",
       "Set up the next project: a QLoRA fine-tune of Mistral 7B on text-to-SQL with the same evaluation discipline.",
     ],
@@ -250,7 +330,7 @@ export const flagshipProjects = [
     slug: "sweta",
     category: "Multilingual language models",
     status: "Released",
-    tagline: "Hindi and Kannada language models trained from scratch — a technical tribute to the languages closest to my life.",
+    tagline: "Hindi and Kannada language models trained from scratch, a technical tribute to the languages closest to my life.",
     summary:
       "Hindi and Kannada pretraining efforts built on a LLaMA-style architecture with custom tokenizers and an end-to-end multilingual data pipeline.",
     details:
@@ -268,15 +348,33 @@ export const flagshipProjects = [
     architecture: [
       {
         name: "Multilingual Corpus",
-        description: "Sangraha: Hindi verified (34.5 GB) and Kannada verified (14 GB). Samanantar: 49.6M English↔Indic sentence pairs. IndicCorp v2 for Indian-context English. Aya dataset (8K Hindi + Kannada instruction pairs). KCC agriculture Q&A for domain coverage.",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Sangraha Hindi</strong> · 34.5 GB verified Hindi text</span></li>
+  <li><span><strong>Sangraha Kannada</strong> · 14 GB verified Kannada text</span></li>
+  <li><span><strong>Samanantar</strong> · 49.6M English-Indic sentence pairs</span></li>
+  <li><span><strong>IndicCorp v2</strong> · Indian-context English</span></li>
+  <li><span><strong>Aya Dataset</strong> · 8K Hindi and Kannada instruction pairs</span></li>
+  <li><span><strong>KCC Agriculture Q&amp;A</strong> · domain coverage</span></li>
+</ul>`,
       },
       {
         name: "Custom 64K BPE Tokenizer",
-        description: "Trained jointly on English, Hindi, and Kannada corpora. 64K vocab (vs 32K for Phoenix) to cover both Indic scripts without excessive token fragmentation. Language-balanced training corpus for the tokenizer itself.",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Joint training</strong> · English, Hindi, and Kannada trained together on a balanced corpus</span></li>
+  <li><span><strong>64K vocab</strong> · double Phoenix's 32K to cover both Indic scripts without fragmentation</span></li>
+  <li><span><strong>Language-balanced</strong> · tokenizer training corpus balanced across all three languages</span></li>
+</ul>`,
       },
       {
         name: "Model",
-        description: "Same LLaMA-style decoder architecture as Phoenix 125M: RoPE, SwiGLU, RMSNorm, FlashAttention, bf16. 134M parameters. The only architectural difference is the larger 64K embedding table.",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>RoPE</strong> · rotary positional encoding</span></li>
+  <li><span><strong>SwiGLU</strong> · gated activation, no ReLU</span></li>
+  <li><span><strong>RMSNorm</strong> · pre-norm, no bias</span></li>
+  <li><span><strong>FlashAttention</strong> · PyTorch 2.x kernel</span></li>
+  <li><span><strong>134M params</strong> · 64K embedding table</span></li>
+  <li><span><strong>bf16</strong> · same architecture as Phoenix</span></li>
+</ul>`,
       },
       {
         name: "Per-Language Evaluation",
@@ -289,9 +387,9 @@ export const flagshipProjects = [
       tools: ["XLM-RoBERTa (lang detection)", "MinHash LSH dedup", "Ray (distributed preprocessing)"],
     },
     highlights: [
-      "Custom 64K BPE tokenizer trained jointly on English, Hindi, and Kannada — covers both Indic scripts without excessive fragmentation.",
-      "Hindi perplexity of 14.5 — strong signal the model has absorbed Hindi language structure at 134M parameters.",
-      "Kannada perplexity of 34.0 — meaningful open-source coverage for a language with limited LLM representation.",
+      "Custom 64K BPE tokenizer trained jointly on English, Hindi, and Kannada, covering both Indic scripts without excessive fragmentation.",
+      "Hindi perplexity of 14.5: strong signal the model has absorbed Hindi language structure at 134M parameters.",
+      "Kannada perplexity of 34.0: meaningful open-source coverage for a language with limited LLM representation.",
       "Reuses the full Phoenix 125M pipeline, demonstrating the architecture generalises cleanly to multilingual training.",
       "Released on HuggingFace as a contribution to Indian language NLP.",
     ],
@@ -303,7 +401,7 @@ export const flagshipProjects = [
   },
   {
     year: "2026",
-    title: "SQLForge — Mistral 7B QLoRA",
+    title: "SQLForge: Mistral 7B QLoRA",
     slug: "mistral-7b-sql-qlora",
     category: "Fine-tuning · Text-to-SQL",
     status: "Released",
@@ -431,13 +529,13 @@ export const flagshipProjects = [
     slug: "linkedin-post-swarm",
     category: "Agentic content pipeline",
     status: "Live",
-    tagline: "A multi-agent AI pipeline that researches, drafts, critiques, and publishes LinkedIn posts — with a human approval gate before every post.",
+    tagline: "A multi-agent AI pipeline that researches, drafts, critiques, and publishes LinkedIn posts, with a human approval gate before every post.",
     summary:
       "A multi-agent publishing workflow that uses Claude, Ollama, Playwright, and Telegram for draft generation, review, approval, and scheduled publishing.",
     details:
       "The system includes critic-revision loops, source aggregation, state management, retries, and escalation paths so autonomy stays controllable.",
     proof: "Human-in-the-loop approvals, resilient retries, scheduled output.",
-    why: "Maintaining a consistent LinkedIn presence was taking hours I did not have, and I kept skipping it. The system had to match my voice exactly — no hustle content, no vague motivation, only genuine technical signal. The harder engineering problem was keeping the human in the loop without making the approval flow annoying enough to skip.",
+    why: "Maintaining a consistent LinkedIn presence was taking hours I did not have, and I kept skipping it. The system had to match my voice exactly: no hustle content, no vague motivation, only genuine technical signal. The harder engineering problem was keeping the human in the loop without making the approval flow annoying enough to skip.",
     skills: ["Agent orchestration", "Prompt engineering", "Playwright", "Telegram Bot API", "Workflow reliability"],
     stats: [
       { value: "~1/day", label: "Follower requests (was ~1/month)" },
@@ -445,6 +543,66 @@ export const flagshipProjects = [
       { value: "6", label: "Posts published" },
     ],
     architecture: [
+      {
+        name: "Publishing pipeline",
+        span: 4,
+        dark: true,
+        html: `<svg class="flow-svg" viewBox="0 0 880 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LinkedIn post publishing pipeline">
+  <defs>
+    <marker id="li-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="li-loop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--bg-accent)"/>
+    </marker>
+  </defs>
+
+  <g transform="translate(10,30)">
+    <rect class="node-box" width="140" height="80" rx="10"/>
+    <text class="node-label" x="70" y="28">Research</text>
+    <text class="node-sub" x="70" y="48">Qwen2.5 14B Q4</text>
+    <text class="node-sub" x="70" y="64">7 RSS sources</text>
+  </g>
+
+  <g transform="translate(190,30)">
+    <rect class="node-box" width="140" height="80" rx="10"/>
+    <text class="node-label" x="70" y="28">Orchestrate</text>
+    <text class="node-sub" x="70" y="48">Claude Sonnet</text>
+    <text class="node-sub" x="70" y="64">write + manage loop</text>
+  </g>
+
+  <g transform="translate(370,30)">
+    <rect class="node-box" width="140" height="80" rx="10"/>
+    <text class="node-label" x="70" y="28">Critic</text>
+    <text class="node-sub" x="70" y="48">Qwen2.5 14B Q4</text>
+    <text class="node-sub" x="70" y="64">threshold 6.5/10</text>
+  </g>
+
+  <g transform="translate(550,30)">
+    <rect class="node-box" width="140" height="80" rx="10"/>
+    <text class="node-label" x="70" y="28">Approve</text>
+    <text class="node-sub" x="70" y="48">Telegram bot</text>
+    <text class="node-sub" x="70" y="64">9 action buttons</text>
+  </g>
+
+  <g transform="translate(730,30)">
+    <rect class="node-box" width="140" height="80" rx="10"/>
+    <text class="node-label" x="70" y="28">Publish</text>
+    <text class="node-sub" x="70" y="48">Playwright</text>
+    <text class="node-sub" x="70" y="64">Mon/Thu 8AM IST</text>
+  </g>
+
+  <g color="var(--text-secondary)">
+    <line class="edge" x1="150" y1="70" x2="190" y2="70" marker-end="url(#li-arr)"/>
+    <line class="edge" x1="330" y1="70" x2="370" y2="70" marker-end="url(#li-arr)"/>
+    <line class="edge" x1="510" y1="70" x2="550" y2="70" marker-end="url(#li-arr)"/>
+    <line class="edge" x1="690" y1="70" x2="730" y2="70" marker-end="url(#li-arr)"/>
+  </g>
+
+  <path class="edge edge--dashed" d="M440,110 L440,162 L260,162 L260,110" marker-end="url(#li-loop)"/>
+  <text class="edge-label" x="350" y="180">score &lt; 6.5, max 10 iterations</text>
+</svg>`,
+      },
       {
         name: "Research Agent",
         description: "Qwen2.5 14B Q4 via Ollama. Fetches and relevance-scores stories from 7 RSS and web sources with CoT reasoning. Prefers today's news with a 3-day fallback. Returns top-3 story briefs to the orchestrator.",
@@ -459,14 +617,24 @@ export const flagshipProjects = [
       },
       {
         name: "Telegram Approval Bot",
-        description: "9 action buttons per draft: Approve, Regenerate (with optional direction text), Reject, Edit inline, Undo (3-step history), As Carousel (PDF), As Article, With Image, and cross-post toggles for Twitter/X and Bluesky.",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Approve</strong> · schedule the draft for publishing</span></li>
+  <li><span><strong>Regenerate</strong> · optional direction text, re-runs critic loop</span></li>
+  <li><span><strong>Reject</strong> · discard and move to next story</span></li>
+  <li><span><strong>Edit inline</strong> · direct text edit without regeneration</span></li>
+  <li><span><strong>Undo</strong> · 3-step draft history</span></li>
+  <li><span><strong>As Carousel</strong> · export to multi-slide PDF via fpdf2</span></li>
+  <li><span><strong>As Article</strong> · publish as LinkedIn long-form</span></li>
+  <li><span><strong>With Image</strong> · attach a generated or uploaded image</span></li>
+  <li><span><strong>Cross-post</strong> · toggle Twitter/X and Bluesky alongside</span></li>
+</ul>`,
       },
       {
         name: "Playwright Publisher",
         description: "Persistent browser session posts at scheduled time (Mon/Thu 8:00 AM IST). Screenshots confirmation. Supports Text, Carousel PDF (fpdf2), LinkedIn Article, and image-attached formats.",
       },
       {
-        name: "Journal System — Monday posts",
+        name: "Journal System: Monday posts",
         description: "LLMLingua-2 compresses journal.md entries (≥60% token reduction). Mistral 7B extracts a structured brief. Claude writes personal-update posts from the compressed work log, giving Monday posts a different voice from Thursday external-discovery posts.",
       },
     ],
@@ -478,7 +646,7 @@ export const flagshipProjects = [
     highlights: [
       "LinkedIn follower requests grew from ~1/month to ~1/day within one month of deployment.",
       "Post engagement grew from ~400 to ~2,000 impressions per month in four weeks.",
-      "Zero autonomous posts — every draft routes through Telegram approval with full edit, undo, and regenerate controls.",
+      "Zero autonomous posts: every draft routes through Telegram approval with full edit, undo, and regenerate controls.",
       "Critic agent enforces a 6.5/10 quality threshold across 4 axes before any draft reaches the approval queue.",
       "6 posts published; cross-posting support live for Twitter/X and Bluesky.",
     ],
@@ -496,7 +664,7 @@ export const flagshipProjects = [
     details:
       "The emphasis is on safe autonomy: typed validation, retry budgets, isolation boundaries, and guardrails that make the system usable for serious testing.",
     proof: "Recon + Analyst agents complete. Scope validation, sandbox, and audit trail fully designed.",
-    why: "Tools like Metasploit work from rigid, templated modules — you pick an exploit and fire it. I wanted a system that reasons about a specific target surface, writes custom exploit code for that surface, tests it in a sandbox, and iterates on failures the way a skilled human would. The interesting engineering problem was keeping that autonomy safe: scope enforcement that cannot be overridden by an LLM, sandboxed execution with network isolation, and a full audit trail.",
+    why: "Tools like Metasploit work from rigid, templated modules: you pick an exploit and fire it. I wanted a system that reasons about a specific target surface, writes custom exploit code for that surface, tests it in a sandbox, and iterates on failures the way a skilled human would. The interesting engineering problem was keeping that autonomy safe: scope enforcement that cannot be overridden by an LLM, sandboxed execution with network isolation, and a full audit trail.",
     skills: ["AI security", "Sandbox design", "Distributed systems", "Event-driven architecture", "API integration"],
     stats: [
       { value: "4", label: "Agent types designed" },
@@ -505,16 +673,67 @@ export const flagshipProjects = [
     ],
     architecture: [
       {
-        name: "Client → Orchestrator",
-        description: "CLI (rakshak) or FastAPI accepts target hostname/IP and scope definition. Scope validated at input — RFC1918, loopback, and link-local addresses rejected before any agent is spawned. Pre-scan health check verifies Ray cluster, Ollama, Docker, Redis, Kafka, Cassandra, and Qdrant.",
+        name: "System overview",
+        span: 4,
+        dark: true,
+        html: `<svg class="flow-svg" viewBox="0 0 880 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rudra agent architecture">
+  <defs>
+    <marker id="ru-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <g transform="translate(10,25)">
+    <rect class="node-box" width="180" height="80" rx="10"/>
+    <text class="node-label" x="90" y="28">Target Input</text>
+    <text class="node-sub" x="90" y="46">CLI rakshak / FastAPI</text>
+    <text class="node-sub" x="90" y="62">scope definition</text>
+  </g>
+
+  <g transform="translate(230,25)">
+    <rect class="node-box" width="180" height="80" rx="10"/>
+    <text class="node-label" x="90" y="28">Scope Check</text>
+    <text class="node-sub" x="90" y="46">hard-coded Python</text>
+    <text class="node-sub" x="90" y="62">RFC1918 / loopback blocked</text>
+  </g>
+
+  <g transform="translate(450,25)">
+    <rect class="node-box" width="180" height="80" rx="10"/>
+    <text class="node-label" x="90" y="28">Agent Chain</text>
+    <text class="node-sub" x="90" y="46">Recon ✓ · Analyst ✓</text>
+    <text class="node-sub" x="90" y="62">Exploit ⏸ · Kafka bus</text>
+  </g>
+
+  <g transform="translate(670,25)">
+    <rect class="node-box" width="180" height="80" rx="10"/>
+    <text class="node-label" x="90" y="28">Docker Sandbox</text>
+    <text class="node-sub" x="90" y="46">300s TTL, isolated</text>
+    <text class="node-sub" x="90" y="62">iptables scope guard</text>
+  </g>
+
+  <g color="var(--text-secondary)">
+    <line class="edge" x1="190" y1="65" x2="230" y2="65" marker-end="url(#ru-arr)"/>
+    <line class="edge" x1="410" y1="65" x2="450" y2="65" marker-end="url(#ru-arr)"/>
+    <line class="edge" x1="630" y1="65" x2="670" y2="65" marker-end="url(#ru-arr)"/>
+  </g>
+</svg>`,
+      },
+      {
+        name: "Client to Orchestrator",
+        description: "CLI (rakshak) or FastAPI accepts target hostname/IP and scope definition. Scope validated at input: RFC1918, loopback, and link-local addresses rejected before any agent is spawned. Pre-scan health check verifies Ray cluster, Ollama, Docker, Redis, Kafka, Cassandra, and Qdrant.",
       },
       {
         name: "Orchestrator (FastAPI + Ray actor)",
-        description: "Manages agent lifecycle, concurrency budget (Redis counter), and heartbeat monitoring (120s timeout). Scope enforcement is hard-coded Python — never delegated to an LLM instruction.",
+        description: "Manages agent lifecycle, concurrency budget (Redis counter), and heartbeat monitoring (120s timeout). Scope enforcement is hard-coded Python, never delegated to an LLM instruction.",
       },
       {
         name: "Shared Bus",
-        description: "Kafka for event routing between agents. Redis for concurrency budget and live state. Cassandra for persistent findings and attempt history. Qdrant for semantic CVE search and partial-win similarity matching.",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>Kafka</strong> · event routing between agents</span></li>
+  <li><span><strong>Redis</strong> · concurrency budget and live state</span></li>
+  <li><span><strong>Cassandra</strong> · persistent findings and attempt history</span></li>
+  <li><span><strong>Qdrant</strong> · semantic CVE search and partial-win similarity</span></li>
+</ul>`,
       },
       {
         name: "Recon Agent ✅ Complete",
@@ -522,15 +741,27 @@ export const flagshipProjects = [
       },
       {
         name: "Analyst Agent ✅ Complete",
-        description: "Consumes surface map, queries Qdrant CVE knowledge base, fetches CVSS scores from NVD API. Scores CVEs by confidence. CVSS scores are always fetched from NVD — never estimated by LLM.",
+        description: "Consumes surface map, queries Qdrant CVE knowledge base, fetches CVSS scores from NVD API. Scores CVEs by confidence. CVSS scores are always fetched from NVD, never estimated by LLM.",
       },
       {
-        name: "Exploit Agent — Parked",
-        description: "5-retry LLM loop: reason → write Python exploit → execute in sandbox → interpret result → iterate with failure context. Budget extended if progress_score > 0.7 on attempt 4. AST-based code validator runs before every execution.",
+        name: "Exploit Agent (Parked)",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Reason</strong> · LLM analyzes CVE and target surface to plan approach</span></li>
+  <li><span><strong>Write</strong> · generates Python exploit, AST-validated before execution</span></li>
+  <li><span><strong>Execute</strong> · runs in isolated Docker sandbox, max 300s</span></li>
+  <li><span><strong>Interpret</strong> · LLM reads output, classifies success or failure mode</span></li>
+  <li><span><strong>Iterate</strong> · up to 5 retries with failure context; extended if progress_score &gt; 0.7</span></li>
+</ul>`,
       },
       {
         name: "Sandbox",
-        description: "Ephemeral Docker container per run, destroyed after 300s or on completion. iptables rules on Linux (M1) whitelist only target IPs. Windows machines (M2/M3) route through a tinyproxy traffic cop. Any scope breach kills the container immediately.",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Ephemeral container</strong> · fresh Docker instance per exploit run</span></li>
+  <li><span><strong>300s TTL</strong> · auto-destroyed on completion or timeout</span></li>
+  <li><span><strong>iptables whitelist</strong> · Linux (M1) allows only target IPs</span></li>
+  <li><span><strong>tinyproxy</strong> · traffic cop on Windows machines (M2/M3)</span></li>
+  <li><span><strong>Scope breach kill</strong> · any out-of-scope connection terminates container immediately</span></li>
+</ul>`,
       },
     ],
     techStack: {
@@ -540,8 +771,8 @@ export const flagshipProjects = [
     },
     highlights: [
       "Recon Agent fully implemented: fingerprints ports, services, versions, auth mechanisms, and API endpoints.",
-      "Analyst Agent fully implemented: maps findings to CVEs via Qdrant semantic search with CVSS scores from NVD — never LLM-estimated.",
-      "Scope enforcement is hard-coded Python — RFC1918 and loopback always blocked regardless of target configuration.",
+      "Analyst Agent fully implemented: maps findings to CVEs via Qdrant semantic search with CVSS scores from NVD, never LLM-estimated.",
+      "Scope enforcement is hard-coded Python: RFC1918 and loopback always blocked regardless of target configuration.",
       "AST-based code validator checks every generated exploit for syntax, import whitelist, and blocked patterns before sandbox execution.",
       "3-machine Ray cluster provides 22 GB total VRAM (RTX 3080 Ti + A1000 + T600) for distributed agent workloads.",
     ],
@@ -559,7 +790,7 @@ export const flagshipProjects = [
     details:
       "Operational controls include SQLite state tracking, Telegram approvals, deployment automation, and delivery flows aimed at production-style reliability.",
     proof: "~25 businesses contacted, live deployment automation, Telegram approval gates.",
-    why: "Local businesses in India have low digital presence. The idea was to eliminate the manual work of finding them, building a site, deploying it, and pitching it — replacing a multi-hour agency process with an automated pipeline that runs in minutes. The hard part was keeping the cost low enough for the economics to work.",
+    why: "Local businesses in India have low digital presence. The idea was to eliminate the manual work of finding them, building a site, deploying it, and pitching it, replacing a multi-hour agency process with an automated pipeline that runs in minutes. The hard part was keeping the cost low enough for the economics to work.",
     skills: ["Backend development", "Playwright", "SQLite", "Workflow engineering", "Operational automation"],
     stats: [
       { value: "~25", label: "Businesses contacted" },
@@ -568,7 +799,62 @@ export const flagshipProjects = [
     ],
     architecture: [
       {
-        name: "Scraper (Playwright → Google Maps)",
+        name: "End-to-end pipeline",
+        span: 4,
+        dark: true,
+        html: `<ol class="flow-steps">
+  <li class="flow-step">
+    <div class="flow-step__num">01</div>
+    <div class="flow-step__body">
+      <h4>Scrape</h4>
+      <p>Playwright scrapes Google Maps by category, city, and radius. Filters to businesses without a website and with a valid phone number.</p>
+      <div class="flow-step__tags"><span>Google Maps</span><span>Playwright</span><span>SQLite</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">02</div>
+    <div class="flow-step__body">
+      <h4>State Track</h4>
+      <p>SQLite records every discovered business, processing status, deploy URL, and outreach history. Prevents duplicate pitches across runs.</p>
+      <div class="flow-step__tags"><span>SQLite</span><span>14-day expiry</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">03</div>
+    <div class="flow-step__body">
+      <h4>Generate Site</h4>
+      <p>Ollama SLMs generate copy (description, services, tagline) per business in under 2 minutes. Real images sourced online. Output is self-contained static HTML/CSS.</p>
+      <div class="flow-step__tags"><span>Ollama SLMs</span><span>&lt; 2 min</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">04</div>
+    <div class="flow-step__body">
+      <h4>Deploy</h4>
+      <p>Netlify CLI deploys to a live subdomain before the owner ever sees it. 14-day expiry with Telegram approval gate to keep free tier headroom.</p>
+      <div class="flow-step__tags"><span>Netlify CLI</span><span>live URL</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">05</div>
+    <div class="flow-step__body">
+      <h4>Write Copy</h4>
+      <p>Claude writes 2-3 scored message variants per business with auto-detected language (Hindi or English) based on name and location.</p>
+      <div class="flow-step__tags"><span>Claude API</span><span>Hindi/English</span><span>scored</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">06</div>
+    <div class="flow-step__body">
+      <h4>Approve and Deliver</h4>
+      <p>Full report card in Telegram: name, phone, live URL, scored variants. Owner picks one. Delivered via WhatsApp or cold email.</p>
+      <div class="flow-step__tags"><span>Telegram approval</span><span>WhatsApp</span><span>cold email</span></div>
+    </div>
+  </li>
+</ol>`,
+      },
+      {
+        name: "Scraper (Playwright to Google Maps)",
         description: "Scrapes Google Maps for businesses matching configured categories, city, and radius. Filters to businesses without a website and with a valid phone number. No API key required. Results written to SQLite.",
       },
       {
@@ -598,9 +884,9 @@ export const flagshipProjects = [
       tools: ["Static HTML/CSS generator", "Auto Hindi/English lang detection", "Google Maps scraping", "python-dotenv"],
     },
     highlights: [
-      "Scrapes Google Maps to find businesses without websites and with a valid phone — no API key, no spend.",
+      "Scrapes Google Maps to find businesses without websites and with a valid phone. No API key, no spend.",
       "Generates a complete static website per business using local Ollama SLMs in under 2 minutes, with real images sourced online.",
-      "Deploys to Netlify automatically before human review — live URL included in every pitch.",
+      "Deploys to Netlify automatically before human review, with a live URL included in every pitch.",
       "Claude writes 2–3 scored, language-appropriate message variants per business with one-click Telegram approval.",
       "~25 businesses discovered and contacted; pivoted to cold email + IT advisory after cost analysis showed ₹500/site spend.",
     ],
@@ -969,7 +1255,7 @@ export const workContent = {
 
 export const pageMeta = {
   "/": {
-    title: "Shreyash Pandey — AI Systems Engineer",
+    title: "Shreyash Pandey, AI Systems Engineer",
     description:
       "Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering.",
   },
@@ -981,7 +1267,7 @@ export const pageMeta = {
   "/about": {
     title: "About · Shreyash Pandey",
     description:
-      "Background, skills, and operating style of Shreyash Pandey — AI systems engineer in Bengaluru with expertise in Python, Java, PyTorch, LangChain, and production reliability.",
+      "Background, skills, and operating style of Shreyash Pandey, AI systems engineer in Bengaluru with expertise in Python, Java, PyTorch, LangChain, and production reliability.",
   },
   "/projects": {
     title: "Projects · Shreyash Pandey",

@@ -10,7 +10,7 @@ interface Props {
 }
 
 const {
-  title = 'Shreyash Pandey — AI Systems Engineer',
+  title = 'Shreyash Pandey, AI Systems Engineer',
   description = 'Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering.',
   ogImage = '/og-image.png',
 } = Astro.props;
@@ -294,7 +294,7 @@ const webPageSchema = {
           e.preventDefault();
           navigator.clipboard.writeText(el.dataset.copyEmail)
             .then(() => showToast('Email copied ✓'))
-            .catch(() => showToast('Copy failed — ' + el.dataset.copyEmail));
+            .catch(() => showToast('Copy failed: ' + el.dataset.copyEmail));
         });
       });
 
