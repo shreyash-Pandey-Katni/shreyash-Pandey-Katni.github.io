@@ -481,6 +481,66 @@ export const flagshipProjects = [
       "~25 businesses discovered and contacted; pivoted to cold email + IT advisory after cost analysis showed ₹500/site spend.",
     ],
   },
+  {
+    year: "2026",
+    title: "ATIS",
+    slug: "atis",
+    category: "Autonomous trading intelligence system",
+    status: "In Progress",
+    tagline: "A near-institutional-grade multi-agent AI system for swing trading on Indian equities — 59 agents, a live Neo4j knowledge graph, a Rust hot path, and a 3-machine K3s cluster at home.",
+    summary:
+      "A 6-tier autonomous system that ingests research papers and filings, builds a causal knowledge graph, backtests theses with walk-forward and Monte Carlo validation, and generates daily ranked swing trade signals on 600 NSE/BSE stocks.",
+    details:
+      "The system is built on three principles: every signal traces to a validated thesis in the knowledge graph, every LLM reasoning step is verified against Neo4j facts, and the architecture self-improves through Elo-based thesis lifecycle management and agent decision auditing.",
+    proof: "59 agents built, Rust hot path implemented, 85/100 system effectiveness score on free data alone.",
+    why: "I wanted to replace intuition-based trading with something systematic and auditable — where every signal has a traceable, backtested reason. But I also wanted to understand what near-institutional-grade tooling actually looks like when you strip away the Bloomberg terminal and the vendor data feeds. The constraint of free data only forced cleaner thinking: if the architecture works here, it works anywhere. The Rust hot path came from a real pain point — broker connection limits and Python's 5–15ms latency floor — not from wanting to use Rust for its own sake.",
+    skills: ["LangGraph", "Neo4j", "Rust", "VectorBT", "GraphRAG", "K3s", "Kafka", "Qdrant"],
+    stats: [
+      { value: "59", label: "Agents across 7 layers" },
+      { value: "<5μs", label: "Tick-to-signal latency (Rust)" },
+      { value: "85/100", label: "System effectiveness score" },
+    ],
+    architecture: [
+      {
+        name: "6-Tier Pipeline",
+        description: "Tier 1 Knowledge Pipeline (ingestion → extraction → thesis building → dedup → backtest queue) → Tier 2 Backtesting Engine (walk-forward, Monte Carlo, portfolio-level) → Tier 3 Daily Screening (regime → news → scanner → fundamental filter → supervisor) → Tier 4 Graph Reasoning (GraphRAG → subgraph narrator → causal chains → historical analogues) → Tier 5 Live Monitoring (position monitor, Elo updater, risk concentration, drawdown protection) → Tier 6 Output (ranked signals, dummy trades, dashboard, Telegram, trade journal).",
+      },
+      {
+        name: "Neo4j Knowledge Graph — 6 Layers",
+        description: "Ontology layer (indicator taxonomy), Knowledge layer (Thesis + Principle registry with Elo scores and backtest metrics), Market Structure layer (600-stock company dependency graph with causal chains and propagation weights), Temporal layer (time-stamped confidence, alpha decay tracking), Event layer (historical event chains: Covid, Ukraine, Iran — which theses worked/failed), and Decision layer (every agent verdict stored as a queryable reasoning audit trail). 20 node types, 25 edge types.",
+      },
+      {
+        name: "GraphRAG Reasoning Engine",
+        description: "Agents never receive raw Cypher output. A 4-layer pipeline converts graph data into LLM-readable context: GraphRAG multi-hop traversal (max 3 hops, confidence-weighted) → Mistral 7B Subgraph Narrator (dependency chains, causal lags, conflict flags, historical analogues, ≤2,000 tokens) → 7-step Chain-of-Thought reasoning template (regime check → dependency scan → conflict resolution → propagation → historical analogue → confidence score → TRADE/WATCH/SKIP) → Verification Agent (extracts factual claims, checks every claim against Neo4j via Cypher, logs hallucination rate per agent, Telegram alert above 15%).",
+      },
+      {
+        name: "Rust + Chronicle Queue Hot Path",
+        description: "Single WebSocket connection to Dhan broker feeds Chronicle Queue (memory-mapped file log, sub-microsecond reads, built-in replay). Rust process distributes ticks to all consumers — live trading, dummy trading, backtesting — from one connection. Eliminates Python's 5–15ms GIL overhead and broker connection limit exhaustion. <5μs end-to-end tick-to-consumer latency. Architecture decision driven by real production pain points, not technology preference.",
+      },
+      {
+        name: "59-Agent Swarm across 7 Layers",
+        description: "Ingestion (7): knowledge, fundamental, news, BSE announcements, spaCy NER, scipy stats, NER retraining. Knowledge (9): quality gate, thesis builder, deduplication via Qdrant cosine similarity, KG generation, subgraph narrator. Analysis (5): regime detection, fundamental filter, signal generation. Signal (7): scanner, momentum, trend, entry/exit calculation. Infrastructure (14): GPU manager, orchestrator, health check, risk concentration, drawdown protection, thesis Elo updater, paper trading, Telegram notifier. Validation (3): hallucination verifier, backtest registry, data quality monitor. Additional (10): bootstrap orchestrator, thesis optimizer, API rate limiter, replay runner.",
+      },
+      {
+        name: "3-Machine K3s Cluster",
+        description: "M1 (RTX 3080 Ti, 12GB VRAM, 32GB RAM) — primary compute: LangGraph orchestrator, Qwen2.5 14B via Ollama, VectorBT GPU backtesting, morning pipeline. M2 (A1000, 6GB VRAM, 32GB RAM) — secondary compute: Mistral 7B, KG generation, news ingestion, scipy stats. M3 (T600, 4GB VRAM, 32GB RAM) — storage + orchestration: PostgreSQL, Neo4j, Qdrant, Redis, Streamlit, Telegram bot. Ceph distributed storage with replication factor 2 across all 3 nodes (~230GB used). Total cluster VRAM: 22GB.",
+      },
+    ],
+    techStack: {
+      core: ["Python 3.11", "Rust (Chronicle Queue hot path)", "LangGraph (agent orchestration)", "Neo4j (knowledge graph)", "Qwen2.5 14B + Mistral 7B via Ollama", "Claude API (validation, 5% of ops)"],
+      infra: ["K3s (3-node cluster)", "Ceph (distributed storage)", "PostgreSQL + streaming replication", "Redis Streams + Sentinel", "Qdrant (vector DB)", "Docker"],
+      tools: ["VectorBT (GPU backtesting)", "Optuna (Bayesian optimisation)", "spaCy en_core_web_trf + custom NER", "scipy (correlation, regime clustering)", "Celery", "Streamlit", "Telegram Bot API"],
+    },
+    highlights: [
+      "59 agents across 7 layers implementing a full knowledge pipeline → backtesting → daily screening → graph reasoning → live monitoring → output stack.",
+      "Neo4j knowledge graph with 6 layers, 20 node types, and 25 edge types — enables second and third-order causal propagation across 600 NSE/BSE stocks.",
+      "GraphRAG verification agent checks every LLM reasoning claim against Neo4j facts and logs hallucination rate per agent — alert fires above 15%.",
+      "Rust + Chronicle Queue hot path achieves <5μs tick-to-consumer latency and solves broker connection limit exhaustion with a single WebSocket connection.",
+      "Walk-forward + Monte Carlo backtesting via VectorBT with full transaction cost accounting (slippage + statutory). System effectiveness: 85/100 on free data.",
+      "Elo-based thesis lifecycle management and temporal edge decay mean the system's knowledge improves over time without manual intervention.",
+      "3-machine home K3s cluster with Ceph replication — if any one machine fails, the other two hold all Tier 1 data and trading continues.",
+    ],
+  },
 ];
 
 export const archiveProjects = [
