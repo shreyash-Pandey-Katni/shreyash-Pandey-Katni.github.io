@@ -234,7 +234,7 @@ export const flagshipProjects = [
       "Built a 7-stage data pipeline processing ~2B tokens from Wikipedia, C4-en, OpenWebText2, Project Gutenberg, StackExchange, and ArXiv.",
       "WinoGrande score of 0.507 — above random chance (0.50), showing the model captures basic commonsense structure.",
       "Released under Apache 2.0 on HuggingFace with full model card, tokenizer, and inference examples.",
-      "What's next: fine-tuning Mistral-7B for SQL generation, applying the same evaluation discipline to instruction following.",
+      "Set up the next project: a QLoRA fine-tune of Mistral 7B on text-to-SQL with the same evaluation discipline.",
     ],
     benchmarks: [
       { name: "WinoGrande", value: "0.507", note: "chance = 0.50" },
@@ -299,6 +299,130 @@ export const flagshipProjects = [
       { name: "Hindi PPL", value: "14.5", note: "134M params, step 2250" },
       { name: "Kannada PPL", value: "34.0", note: "134M params, step 2250" },
       { name: "English PPL", value: "215.7", note: "secondary language" },
+    ],
+  },
+  {
+    year: "2026",
+    title: "SQLForge — Mistral 7B QLoRA",
+    slug: "mistral-7b-sql-qlora",
+    category: "Fine-tuning · Text-to-SQL",
+    status: "Released",
+    tagline: "QLoRA fine-tune of Mistral 7B v0.3 on text-to-SQL. Exact set match goes from 9 percent to 87 percent on the internal test split, trained on a single RTX 3080 Ti.",
+    summary:
+      "A 4-bit QLoRA fine-tune that turns Mistral 7B v0.3 into a reliable text-to-SQL model. The same 12 GB GPU used for Phoenix 125M, with a 3.75 GB VRAM headroom budgeted up front, and a schema-aware evaluation rebuild after the first WikiSQL run showed the metric was lying.",
+    details:
+      "The project is a focused engineering exercise in capability lift on consumer hardware: model selection by VRAM math, LoRA rank tuning, instruction-template-correct loss masking, and an evaluation harness that does true execution-accuracy comparison against table rows rather than string match.",
+    proof: "+77.8 percentage point exact-match lift, 97.4 percent valid SQL, ~8.25 GB peak VRAM on a 12 GB card.",
+    why: "After pretraining Phoenix 125M from scratch, the natural next question was: can the same hardware do something practically useful? Text-to-SQL was the right target. The base Mistral 7B knows SQL syntax from The Stack pretraining but is unreliable on real schemas. QLoRA on 178K examples was small enough to fit, large enough to matter, and the eval signal is concrete (does the query return the right rows). The schema-aware eval rebuild was the most important part. The first WikiSQL run reported 0 percent valid SQL because the validator was checking string equality instead of execution. Fixing that turned a panic moment into a 97.4 percent result.",
+    skills: ["QLoRA", "Fine-tuning", "bitsandbytes", "PEFT", "Text-to-SQL", "Evaluation harnesses", "vLLM"],
+    href: "https://huggingface.co/shreyash-pandey-katni/SQLForge-Mistral-7B-QLoRA",
+    ctaLabel: "View model on HuggingFace",
+    stats: [
+      { value: "+77.8 pp", label: "Exact match lift over base" },
+      { value: "8.25 GB", label: "Peak VRAM on 12 GB card" },
+      { value: "97.4%", label: "Valid SQL (schema-aware)" },
+    ],
+    architecture: [
+      {
+        name: "Model selection",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>Mistral 7B v0.3</strong> · Apache 2.0, no gating</span></li>
+  <li><span><strong>~8.25 GB peak VRAM</strong> · 3.75 GB headroom on 12 GB</span></li>
+  <li><span><strong>Code-heavy pretraining</strong> · The Stack v1 + GitHub</span></li>
+  <li><span><strong>Trivial chat template</strong> · clean loss masking on answers</span></li>
+  <li><span><strong>vLLM ready</strong> · no extra flags for serving</span></li>
+  <li><span><strong>Largest delta</strong> · capable base → big eval lift</span></li>
+</ul>
+<p class="bullet-list__meta">Beat Llama 3.1 8B (gated, 10.5 GB), Phi-3.5-mini (under-utilises GPU), Qwen2.5 7B</p>`,
+      },
+      {
+        name: "VRAM budget on 12 GB",
+        span: 4,
+        dark: true,
+        html: `<ol class="flow-steps">
+  <li class="flow-step">
+    <div class="flow-step__num">3.60</div>
+    <div class="flow-step__body">
+      <h4>Model weights</h4>
+      <p>4-bit NF4 quantisation with double quantisation. ~22 GB BF16 base compressed into 3.6 GB.</p>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">0.03</div>
+    <div class="flow-step__body">
+      <h4>LoRA adapters</h4>
+      <p>Rank 64 across 7 target modules (q, k, v, o, gate, up, down) in BF16. Trainable parameter count is tiny.</p>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">0.12</div>
+    <div class="flow-step__body">
+      <h4>AdamW optimiser state</h4>
+      <p>FP32 momentum and variance for adapter weights only. The frozen base model contributes nothing here.</p>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">3.00</div>
+    <div class="flow-step__body">
+      <h4>Activations</h4>
+      <p>Batch size 1, sequence length 512, gradient checkpointing on. Recompute trades compute for memory.</p>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">1.50</div>
+    <div class="flow-step__body">
+      <h4>CUDA kernels and fragmentation</h4>
+      <p>Overhead for cuBLAS, bitsandbytes kernels, and allocator fragmentation. Buffered to stay safe.</p>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">8.25</div>
+    <div class="flow-step__body">
+      <h4>Total estimate</h4>
+      <p>3.75 GB headroom on a 12 GB RTX 3080 Ti. Allows future sequence-length and rank increases without OOM.</p>
+    </div>
+  </li>
+</ol>`,
+      },
+      {
+        name: "Data and recipe",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Primary</strong> · b-mc2/sql-create-context (78,577 examples, Apache 2.0)</span></li>
+  <li><span><strong>Augmentation</strong> · gretelai/synthetic_text_to_sql (100K, Apache 2.0)</span></li>
+  <li><span><strong>Quantisation</strong> · 4-bit NF4 with double quant via bitsandbytes</span></li>
+  <li><span><strong>LoRA</strong> · rank 64, alpha 16, dropout 0.05, 7 target modules</span></li>
+  <li><span><strong>Loss masking</strong> · DataCollatorForCompletionOnlyLM on the [/INST] split</span></li>
+  <li><span><strong>Schedule</strong> · cosine LR with warmup, gradient checkpointing on</span></li>
+</ul>`,
+      },
+      {
+        name: "Evaluation harness",
+        description: "Three benchmarks: a 500-example internal test split (exact set match plus schema-aware valid SQL), WikiSQL test set with true execution accuracy against table rows, and Spider 1.0 dev for community comparability. The first WikiSQL run reported 0 percent valid SQL because the validator was checking string equality; rewriting it to actually run the queries against table schemas turned the metric honest and revealed a real 97.4 percent valid rate.",
+      },
+      {
+        name: "Serving",
+        description: "Adapter merged back into the base weights and re-exported in safetensors format. Loads cleanly into vLLM with no custom code, ready for batched throughput serving. Apache 2.0 license, published on HuggingFace alongside the evaluation results.",
+      },
+    ],
+    techStack: {
+      core: ["PyTorch 2.x", "HuggingFace Transformers", "PEFT (QLoRA)", "bitsandbytes (4-bit NF4)", "TRL (SFTTrainer)"],
+      data: ["b-mc2/sql-create-context", "gretelai/synthetic_text_to_sql", "WikiSQL", "Spider 1.0 dev"],
+      tools: ["vLLM (serving)", "sqlglot (schema-aware validation)", "NAS via SMB (checkpoints)", "HuggingFace Hub"],
+    },
+    highlights: [
+      "Exact set match jumped from 9.2 percent (base Mistral 7B v0.3) to 87.0 percent on the 500-example internal test split. A 77.8 percentage point lift from a single fine-tune run.",
+      "Schema-aware valid SQL hit 97.4 percent. The original string-match validator reported 0 percent; rewriting it to execute queries against table schemas turned a panic into a real result.",
+      "Trained on a single RTX 3080 Ti with ~8.25 GB peak VRAM. The 3.75 GB headroom budgeted up front meant zero OOM during a 1,173-second eval run on 500 examples.",
+      "WikiSQL execution accuracy of 28.19 percent on 15,878 test examples, evaluated by actually running the predicted SQL against the WikiSQL table rows.",
+      "Picked Mistral 7B v0.3 over Llama 3.1 8B and Phi-3.5-mini after a written decision matrix on VRAM, license, code pretraining, and instruction template stability.",
+      "Adapter merged into base weights and exported in safetensors. Loads into vLLM with no extra flags. Released under Apache 2.0 on HuggingFace.",
+    ],
+    benchmarks: [
+      { name: "Exact set match", value: "87.0%", note: "internal test, 500 examples" },
+      { name: "Baseline EM", value: "9.2%", note: "base Mistral, same split" },
+      { name: "Valid SQL (schema-aware)", value: "97.4%", note: "vs 86.2% baseline" },
+      { name: "WikiSQL execution accuracy", value: "28.19%", note: "15,878 examples" },
+      { name: "Peak VRAM", value: "8.25 GB", note: "on 12 GB RTX 3080 Ti" },
     ],
   },
   {
@@ -503,31 +627,114 @@ export const flagshipProjects = [
     architecture: [
       {
         name: "Six-tier pipeline",
-        description: "Every signal flows top to bottom through these six tiers, with full observability and audit trails at each handoff.",
         span: 4,
         dark: true,
-        diagram: `flowchart TD
-  T1["<b>1. Knowledge Pipeline</b><br/>ingestion · extraction<br/>thesis building · dedup"]
-  T2["<b>2. Backtesting Engine</b><br/>walk-forward<br/>Monte Carlo · portfolio"]
-  T3["<b>3. Daily Screening</b><br/>regime · news · scanner<br/>fundamental filter"]
-  T4["<b>4. Graph Reasoning</b><br/>GraphRAG · subgraph narrator<br/>causal chains · analogues"]
-  T5["<b>5. Live Monitoring</b><br/>position monitor · Elo updater<br/>risk · drawdown"]
-  T6["<b>6. Output</b><br/>ranked signals · dummy trades<br/>dashboard · Telegram"]
-  T1 --> T2 --> T3 --> T4 --> T5 --> T6`,
+        html: `<ol class="flow-steps">
+  <li class="flow-step">
+    <div class="flow-step__num">01</div>
+    <div class="flow-step__body">
+      <h4>Knowledge Pipeline</h4>
+      <p>Ingest research papers and filings, extract entities, build deduplicated theses with provenance.</p>
+      <div class="flow-step__tags"><span>ingestion</span><span>extraction</span><span>thesis building</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">02</div>
+    <div class="flow-step__body">
+      <h4>Backtesting Engine</h4>
+      <p>Walk-forward and Monte Carlo validation with full transaction cost accounting on GPU.</p>
+      <div class="flow-step__tags"><span>walk-forward</span><span>Monte Carlo</span><span>portfolio sim</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">03</div>
+    <div class="flow-step__body">
+      <h4>Daily Screening</h4>
+      <p>Regime detection, news ingestion, technical scanner, and fundamental filter run before market open.</p>
+      <div class="flow-step__tags"><span>regime</span><span>news</span><span>scanner</span><span>fundamentals</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">04</div>
+    <div class="flow-step__body">
+      <h4>Graph Reasoning</h4>
+      <p>GraphRAG multi-hop traversal, subgraph narration, and causal chain analysis over the knowledge graph.</p>
+      <div class="flow-step__tags"><span>GraphRAG</span><span>subgraph narrator</span><span>causal chains</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">05</div>
+    <div class="flow-step__body">
+      <h4>Live Monitoring</h4>
+      <p>Real-time position monitor, Elo updater, risk checks, and drawdown protection on every tick.</p>
+      <div class="flow-step__tags"><span>positions</span><span>Elo updater</span><span>risk</span><span>drawdown</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">06</div>
+    <div class="flow-step__body">
+      <h4>Output</h4>
+      <p>Ranked daily signals, dummy trades for tracking, live dashboard, and Telegram approvals.</p>
+      <div class="flow-step__tags"><span>ranked signals</span><span>dummy trades</span><span>dashboard</span><span>Telegram</span></div>
+    </div>
+  </li>
+</ol>`,
       },
       {
         name: "GraphRAG reasoning chain",
-        description: "Agents never receive raw Cypher output. Every reasoning step is verified against Neo4j; hallucination rate above 15 percent fires an alert.",
+        description: "Agents never receive raw Cypher output. Every reasoning step is verified against Neo4j; if hallucination rate goes above 15 percent, a Telegram alert fires.",
         span: 4,
-        diagram: `flowchart LR
-  KG[("Neo4j<br/>Knowledge Graph")]
-  GR["GraphRAG<br/>multi-hop traversal<br/><i>max 3 hops</i>"]
-  SN["Mistral 7B<br/>Subgraph Narrator<br/><i>≤2K tokens</i>"]
-  COT["7-step CoT<br/>regime → analogue<br/>→ TRADE / WATCH / SKIP"]
-  V["Verification Agent<br/>checks claims<br/>vs Neo4j facts"]
-  TG[/"Telegram alert<br/>if hallucination > 15%"/]
-  KG --> GR --> SN --> COT --> V
-  V -.->|fail| TG`,
+        html: `<svg class="flow-svg" viewBox="0 0 880 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GraphRAG reasoning chain">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+    <marker id="arr-alert" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--bg-accent)"/>
+    </marker>
+  </defs>
+
+  <g transform="translate(20,40)">
+    <rect class="node-box" width="140" height="74" rx="10"/>
+    <text class="node-label" x="70" y="32">Neo4j KG</text>
+    <text class="node-sub" x="70" y="52">600 stocks · theses</text>
+  </g>
+  <g transform="translate(190,40)">
+    <rect class="node-box" width="140" height="74" rx="10"/>
+    <text class="node-label" x="70" y="32">GraphRAG</text>
+    <text class="node-sub" x="70" y="52">multi-hop · max 3</text>
+  </g>
+  <g transform="translate(360,40)">
+    <rect class="node-box" width="140" height="74" rx="10"/>
+    <text class="node-label" x="70" y="32">Mistral 7B</text>
+    <text class="node-sub" x="70" y="52">subgraph narrator</text>
+  </g>
+  <g transform="translate(530,40)">
+    <rect class="node-box" width="140" height="74" rx="10"/>
+    <text class="node-label" x="70" y="32">7-step CoT</text>
+    <text class="node-sub" x="70" y="52">regime → trade</text>
+  </g>
+  <g transform="translate(700,40)">
+    <rect class="node-box" width="160" height="74" rx="10"/>
+    <text class="node-label" x="80" y="32">Verification</text>
+    <text class="node-sub" x="80" y="52">claims vs Neo4j</text>
+  </g>
+
+  <g color="var(--text-secondary)">
+    <line class="edge" x1="160" y1="77" x2="190" y2="77" marker-end="url(#arr)"/>
+    <line class="edge" x1="330" y1="77" x2="360" y2="77" marker-end="url(#arr)"/>
+    <line class="edge" x1="500" y1="77" x2="530" y2="77" marker-end="url(#arr)"/>
+    <line class="edge" x1="670" y1="77" x2="700" y2="77" marker-end="url(#arr)"/>
+  </g>
+
+  <g transform="translate(700,170)">
+    <rect class="alert-box" width="160" height="60" rx="10"/>
+    <text class="node-label" x="80" y="28" style="fill: var(--bg-accent);">Telegram alert</text>
+    <text class="node-sub" x="80" y="46">hallucination &gt; 15%</text>
+  </g>
+  <path class="edge edge--dashed" d="M780,114 L780,170" marker-end="url(#arr-alert)"/>
+  <text class="edge-label" x="820" y="146">fail</text>
+</svg>`,
       },
       {
         name: "59-agent swarm, 7 layers",
@@ -535,7 +742,15 @@ export const flagshipProjects = [
       },
       {
         name: "Neo4j knowledge graph",
-        description: "Six layers: Ontology, Knowledge (Thesis registry with Elo scores), Market Structure (600-stock dependency graph), Temporal (alpha decay), Event (historical chains), Decision (agent verdict audit trail). 20 node types, 25 edge types.",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>Ontology</strong> · node and edge type schema</span></li>
+  <li><span><strong>Knowledge</strong> · thesis registry with Elo scores</span></li>
+  <li><span><strong>Market Structure</strong> · 600-stock dependency graph</span></li>
+  <li><span><strong>Temporal</strong> · alpha decay over time</span></li>
+  <li><span><strong>Event</strong> · historical causal chains</span></li>
+  <li><span><strong>Decision</strong> · agent verdict audit trail</span></li>
+</ul>
+<p class="bullet-list__meta">20 node types  ·  25 edge types</p>`,
       },
       {
         name: "Rust hot path",
@@ -543,7 +758,12 @@ export const flagshipProjects = [
       },
       {
         name: "3-machine K3s cluster",
-        description: "M1 (RTX 3080 Ti, 12 GB): orchestrator, Qwen2.5 14B, GPU backtesting. M2 (A1000, 6 GB): Mistral 7B, KG generation. M3 (T600, 4 GB): PostgreSQL, Neo4j, Qdrant, Redis. Ceph replication factor 2 across all three nodes.",
+        html: `<ul class="bullet-list">
+  <li><span><strong>M1</strong> · RTX 3080 Ti, 12 GB · orchestrator, Qwen2.5 14B, GPU backtesting</span></li>
+  <li><span><strong>M2</strong> · A1000, 6 GB · Mistral 7B, knowledge graph generation</span></li>
+  <li><span><strong>M3</strong> · T600, 4 GB · PostgreSQL, Neo4j, Qdrant, Redis</span></li>
+</ul>
+<p class="bullet-list__meta">Ceph replication factor 2  ·  any one node can fail</p>`,
       },
     ],
     techStack: {
