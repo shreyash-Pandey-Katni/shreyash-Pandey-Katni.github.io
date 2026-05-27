@@ -265,6 +265,58 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
 }
 
 
+/* ---------- Diagram Card ---------- */
+.card--diagram {
+  padding: 32px 28px;
+}
+
+.mermaid-wrap {
+  margin-top: 20px;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mermaid-wrap .mermaid {
+  background: transparent;
+  font-family: var(--font-mono), monospace;
+  margin: 0;
+  min-width: 100%;
+  text-align: center;
+}
+
+.mermaid-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.card--dark .mermaid-wrap .mermaid svg .node rect,
+.card--dark .mermaid-wrap .mermaid svg .node polygon {
+  fill: rgba(255,255,255,0.06) !important;
+  stroke: rgba(255,255,255,0.4) !important;
+}
+.card--dark .mermaid-wrap .mermaid svg .node .label,
+.card--dark .mermaid-wrap .mermaid svg .nodeLabel {
+  color: rgba(255,255,255,0.9) !important;
+  fill: rgba(255,255,255,0.9) !important;
+}
+.card--dark .mermaid-wrap .mermaid svg .edgePath .path {
+  stroke: rgba(255,255,255,0.5) !important;
+}
+.card--dark .mermaid-wrap .mermaid svg .arrowheadPath {
+  fill: rgba(255,255,255,0.6) !important;
+  stroke: rgba(255,255,255,0.6) !important;
+}
+.card--dark .mermaid-wrap .mermaid svg .edgeLabel {
+  background-color: transparent !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+.card--dark .mermaid-wrap .mermaid svg .edgeLabel rect {
+  fill: #1a1a1a !important;
+}
+
+
 /* ---------- Hero Highlights ---------- */
 .hero-highlights {
   list-style: none;
