@@ -1067,6 +1067,126 @@ export const flagshipProjects = [
       "3-machine home K3s cluster with Ceph replication. If any one machine fails, the other two hold all Tier 1 data and trading continues.",
     ],
   },
+  {
+    year: "2026",
+    title: "Dhan MCP Server",
+    slug: "dhan-mcp",
+    category: "Model Context Protocol server",
+    status: "Released",
+    tagline: "A Model Context Protocol server that lets Claude and Copilot query my live Dhan broker account and Indian market data in plain English.",
+    summary:
+      "A Model Context Protocol server that exposes my live DhanHQ broker account and Indian market data to any MCP client, so Claude or Copilot can answer questions about holdings, positions, and option chains directly.",
+    details:
+      "Built on the official DhanHQ SDK v2 with 11 live tools across portfolio, market data, options, and instrument discovery, two transports, and order placement implemented but disabled so it can never touch real money unintentionally.",
+    proof: "11 live MCP tools, official DhanHQ SDK v2, order placement disabled by default for safety.",
+    why: "I wanted my AI assistants to talk to my actual broker account, not a toy sandbox. So I wrapped Dhan's official SDK in a Model Context Protocol server, which means Claude or Copilot can pull my holdings, scan an option chain, or fetch historical data just by being asked in plain English. I deliberately left order placement commented out: the tools are written and tested, but a model that can read my portfolio is useful, while a model that can place orders on its own is a liability I did not want by default. Turning trading on is a conscious choice I make, not something that ships enabled.",
+    skills: ["MCP", "FastMCP", "DhanHQ API", "Python", "Options data", "API integration"],
+    href: "https://github.com/shreyash-Pandey-Katni/Dhan-MCP-Server",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "11", label: "Live MCP tools" },
+      { value: "Δ Θ Γ V", label: "Option Greeks per contract" },
+      { value: "2", label: "Transports (stdio + HTTP)" },
+    ],
+    architecture: [
+      {
+        name: "Request lifecycle",
+        span: 4,
+        dark: true,
+        html: `<ol class="flow-steps">
+  <li class="flow-step">
+    <div class="flow-step__num">01</div>
+    <div class="flow-step__body">
+      <h4>MCP Client</h4>
+      <p>Claude, Copilot, or any MCP host calls a tool over stdio or HTTP.</p>
+      <div class="flow-step__tags"><span>Claude</span><span>Copilot</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">02</div>
+    <div class="flow-step__body">
+      <h4>FastMCP</h4>
+      <p>Tool dispatched through FastMCP with a typed signature and a shared app context.</p>
+      <div class="flow-step__tags"><span>typed tools</span><span>app context</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">03</div>
+    <div class="flow-step__body">
+      <h4>Config</h4>
+      <p>Credentials load from env or INI, secrets masked in logs, sandbox stub if DHAN_FAKE is set.</p>
+      <div class="flow-step__tags"><span>env / INI</span><span>secret masking</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">04</div>
+    <div class="flow-step__body">
+      <h4>DhanHQ SDK v2</h4>
+      <p>Official SDK call routed to the right Dhan REST endpoint for the requested data.</p>
+      <div class="flow-step__tags"><span>dhanhq 2.0</span><span>REST</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">05</div>
+    <div class="flow-step__body">
+      <h4>Dhan REST API</h4>
+      <p>Live NSE and BSE data, holdings, positions, or a full option chain comes back.</p>
+      <div class="flow-step__tags"><span>NSE / BSE</span><span>option chain</span></div>
+    </div>
+  </li>
+  <li class="flow-step">
+    <div class="flow-step__num">06</div>
+    <div class="flow-step__body">
+      <h4>Normalize</h4>
+      <p>Failure payloads parsed, DH-1111 treated as empty, clean JSON returned to the model.</p>
+      <div class="flow-step__tags"><span>DH-1111 empty</span><span>clean JSON</span></div>
+    </div>
+  </li>
+</ol>`,
+      },
+      {
+        name: "Tool surface",
+        html: `<ul class="bullet-list bullet-list--two-col">
+  <li><span><strong>Portfolio</strong> · holdings, positions, orders, order by id</span></li>
+  <li><span><strong>Market data</strong> · OHLC, intraday minute, historical daily</span></li>
+  <li><span><strong>Options</strong> · chain with Greeks, expiry list, contract lookup</span></li>
+  <li><span><strong>Discovery</strong> · security id search across NSE and BSE</span></li>
+</ul>
+<p class="bullet-list__meta">11 live tools  ·  1 config resource</p>`,
+      },
+      {
+        name: "Order placement, off by default",
+        description: "place_order and cancel_order are fully implemented but left commented out in the server. The running service is read-only by design, so an LLM cannot move real money by accident. Enabling live trading is a deliberate one-line change, not the default.",
+      },
+      {
+        name: "Config and safety",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Credentials</strong> · env vars or INI, never hardcoded</span></li>
+  <li><span><strong>Secret masking</strong> · tokens shown as abc***xyz in logs</span></li>
+  <li><span><strong>Sandbox stub</strong> · DHAN_FAKE swaps in a mock client</span></li>
+  <li><span><strong>Graceful empty</strong> · DH-1111 returns empty data, not an error</span></li>
+  <li><span><strong>Rate aware</strong> · respects the 1 request / 3s options limit</span></li>
+</ul>`,
+      },
+      {
+        name: "Two transports",
+        description: "stdio for local hosts like Claude Desktop and Copilot, and streamable-HTTP for running the server remotely. Same tool surface either way, selected without touching tool code.",
+      },
+    ],
+    techStack: {
+      core: ["Python 3.11", "FastMCP (mcp[cli] 1.14)", "DhanHQ SDK v2", "Pydantic v2", "Model Context Protocol"],
+      infra: ["stdio transport", "Streamable-HTTP transport", "INI / env config"],
+      tools: ["DhanHQ REST API", "NSE / BSE instruments", "Option chain + Greeks", "DHAN_FAKE sandbox stub"],
+    },
+    highlights: [
+      "Eleven live MCP tools cover portfolio (holdings, positions, orders), market data (OHLC, intraday, historical), options (chain with Greeks, expiries, contract lookup), and instrument discovery across NSE and BSE.",
+      "Order placement and cancellation are fully implemented but left commented out, so an LLM connected to the server is read-only by default and cannot move real money by accident.",
+      "The option chain tool returns full Greeks (Delta, Theta, Gamma, Vega) and respects Dhan's one request per three seconds options limit.",
+      "Two transports from the same code: stdio for local hosts like Claude Desktop and Copilot, and streamable-HTTP for running the server remotely.",
+      "Credentials load from environment or an INI file with secret masking in logs, and a DHAN_FAKE sandbox stub lets me develop without live access.",
+      "Feeds the same DhanHQ market data that the Rust hot path in ATIS consumes, so the broker integration is shared across my trading work.",
+    ],
+  },
 ];
 
 export const archiveProjects = [

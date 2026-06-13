@@ -61,8 +61,8 @@ const { title, description } = pageMeta['/projects'];
     <div class="bento reveal-stagger">
       {flagshipProjects.map((proj, i) => {
         const isDark = i === 0 || i === 3;
-        // Keep row balance in 4-col grid: first row 2+2, second row 1+1+2.
-        const isWide = i === 0 || i === 1 || i === 4;
+        // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2.
+        const isWide = i === 0 || i === 1 || i === 4 || i === 7;
         const spanClass = isWide ? 'span-2' : '';
         const isModelCard = proj.ctaLabel === 'View model card';
         const ctaVariant = isDark ? 'ghost' : isModelCard ? 'accent' : 'ghost';
