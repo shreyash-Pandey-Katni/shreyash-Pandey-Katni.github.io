@@ -9,19 +9,21 @@ import {
   flagshipProjects,
   workPrinciples,
   primaryContactHref,
+  pageMeta,
 } from '../data/siteContent';
 
 const featured = flagshipProjects.slice(0, 3);
 const { metrics, heroPanel, highlights } = homeContent;
+const { title, description } = pageMeta['/'];
 ---
 
-<BaseLayout title="Home">
+<BaseLayout title={title} description={description}>
   {/* ===== HERO ROW ===== */}
   <section class="page__section">
     <div class="bento reveal-stagger">
       {/* Hero card — span 3 */}
       <Reveal class="card span-3" style="display:flex;flex-direction:column;">
-        <p class="t-eyebrow card__eyebrow">{homeContent.eyebrow}</p>
+        <p class="t-eyebrow card__eyebrow" data-typewriter>{homeContent.eyebrow}</p>
         <h1 class="t-display card__title">{homeContent.title}</h1>
         <p class="t-body--lg card__body" style="max-width: 640px;">
           {homeContent.lede}

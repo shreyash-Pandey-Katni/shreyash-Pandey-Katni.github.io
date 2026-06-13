@@ -1,13 +1,60 @@
 ---
 import Nav from '../components/Nav.astro';
 import '../styles/index.css';
+import { siteMeta } from '../data/siteContent';
 
 interface Props {
   title?: string;
-  eyebrow?: string;
+  description?: string;
+  ogImage?: string;
 }
 
-const { title = 'Shreyash Pandey' } = Astro.props;
+const {
+  title = 'Shreyash Pandey, AI Systems Engineer',
+  description = 'Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering.',
+  ogImage = '/og-image.png',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, 'https://shreyash.co.in').href;
+const ogImageURL = new URL(ogImage, 'https://shreyash.co.in').href;
+
+const isHome    = Astro.url.pathname === '/';
+const isAbout   = Astro.url.pathname === '/about';
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Shreyash Pandey',
+  url: 'https://shreyash.co.in',
+  jobTitle: 'AI Systems Engineer',
+  worksFor: { '@type': 'Organization', name: 'IBM Software Labs' },
+  address: { '@type': 'PostalAddress', addressLocality: 'Bengaluru', addressCountry: 'IN' },
+  sameAs: [
+    siteMeta.github,
+    siteMeta.linkedin,
+    siteMeta.medium,
+    siteMeta.huggingFace,
+    siteMeta.stackOverflow,
+    siteMeta.topmate,
+  ],
+};
+
+const webSiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Shreyash Pandey',
+  url: 'https://shreyash.co.in',
+};
+
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description,
+  url: canonicalURL,
+  inLanguage: 'en',
+  isPartOf: { '@type': 'WebSite', url: 'https://shreyash.co.in' },
+};
 ---
 
 <!doctype html>
@@ -16,13 +63,44 @@ const { title = 'Shreyash Pandey' } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#F2F0ED" />
-    <meta
-      name="description"
-      content="Shreyash Pandey builds AI systems, agentic workflows, and backend platforms. Explore product work from IBM, flagship 2026 projects, and a portfolio focused on reliable applied AI engineering."
-    />
+
+    <!-- Primary SEO -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Shreyash Pandey" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Structured data: WebPage on every route -->
+    <script type="application/ld+json" set:html={JSON.stringify(webPageSchema)} />
+
+    <!-- Structured data: Person + WebSite on home and about -->
+    {(isHome || isAbout) && (
+      <>
+        <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+        <script type="application/ld+json" set:html={JSON.stringify(webSiteSchema)} />
+      </>
+    )}
+
+    <!-- Icons & manifest -->
     <link rel="icon" href="/icon.svg" />
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,9 +109,17 @@ const { title = 'Shreyash Pandey' } = Astro.props;
       rel="stylesheet"
     />
 
-    <title>{title} | AI Systems Engineer</title>
+    <!-- Anti-FOUC: apply saved/preferred theme before first paint -->
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem('theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
   </head>
-  <body>
+  <body data-github={siteMeta.github}>
+    <div class="spotlight" aria-hidden="true"></div>
     <div class="pagewrap">
       <Nav />
       <main class="page shell">
@@ -41,19 +127,209 @@ const { title = 'Shreyash Pandey' } = Astro.props;
       </main>
     </div>
 
+    <!-- Fixed UI chrome -->
+    <button class="scroll-top" aria-label="Scroll to top">↑</button>
+    <div class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="kbd-panel" id="kbd-panel" role="dialog" aria-modal="true" aria-labelledby="kbd-title">
+      <div class="kbd-panel__card">
+        <p class="kbd-panel__title" id="kbd-title">Keyboard shortcuts</p>
+        <div class="kbd-row"><span>Toggle dark / light</span><kbd class="kbd">T</kbd></div>
+        <div class="kbd-row"><span>Go home</span><kbd class="kbd">H</kbd></div>
+        <div class="kbd-row"><span>View projects</span><kbd class="kbd">P</kbd></div>
+        <div class="kbd-row"><span>View work</span><kbd class="kbd">W</kbd></div>
+        <div class="kbd-row"><span>Open GitHub</span><kbd class="kbd">G</kbd></div>
+        <div class="kbd-row"><span>Show this panel</span><kbd class="kbd">?</kbd></div>
+        <span class="kbd-hint">Press <kbd class="kbd">Esc</kbd> or click outside to close</span>
+      </div>
+    </div>
+
     <script>
-      /* Scroll reveal handler */
+      /* ── Theme ─────────────────────────────────────────────── */
+      const THEME_KEY = 'theme';
+      const root = document.documentElement;
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+      function applyTheme(t) {
+        root.classList.add('theme-changing');
+        root.setAttribute('data-theme', t);
+        if (themeMeta) themeMeta.content = t === 'dark' ? '#0F0F10' : '#F2F0ED';
+        setTimeout(() => root.classList.remove('theme-changing'), 400);
+      }
+      document.querySelectorAll('.theme-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          localStorage.setItem(THEME_KEY, next);
+          applyTheme(next);
+        });
+      });
+      sysDark.addEventListener('change', (e) => {
+        if (!localStorage.getItem(THEME_KEY)) applyTheme(e.matches ? 'dark' : 'light');
+      });
+
+      /* ── Toast helper ──────────────────────────────────────── */
+      const toastEl = document.querySelector('.toast');
+      function showToast(msg, ms = 2500) {
+        if (!toastEl) return;
+        toastEl.textContent = msg;
+        toastEl.classList.add('is-visible');
+        clearTimeout(toastEl._tid);
+        toastEl._tid = setTimeout(() => toastEl.classList.remove('is-visible'), ms);
+      }
+
+      /* ── Scroll reveal + stat counter ─────────────────────── */
+      function countUp(el) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const raw = el.textContent.trim();
+        const prefix = raw.match(/^[^0-9]*/)[0];
+        const suffix = raw.match(/[^0-9.]*$/)[0];
+        const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
+        if (isNaN(num) || num === 0) return;
+        const dec = raw.includes('.')
+          ? (raw.split('.')[1] || '').replace(/[^0-9]/g, '').length : 0;
+        const t0 = performance.now();
+        (function tick(now) {
+          const p = Math.min((now - t0) / 1200, 1);
+          const e = 1 - (1 - p) ** 3;
+          el.textContent = prefix + (num * e).toFixed(dec) + suffix;
+          if (p < 1) requestAnimationFrame(tick);
+        })(t0);
+      }
+
       const reveals = document.querySelectorAll('.reveal');
-      const observer = new IntersectionObserver((entries) => {
+      const revealObs = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
+            entry.target.querySelectorAll('.stat-value').forEach(countUp);
+            revealObs.unobserve(entry.target);
           }
         });
       }, { threshold: 0.08 });
+      reveals.forEach((el) => revealObs.observe(el));
 
-      reveals.forEach((el) => observer.observe(el));
+      /* ── Reading progress bar ──────────────────────────────── */
+      const progressBar = document.querySelector('.reading-progress');
+      if (progressBar) {
+        const updateProgress = () => {
+          const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+          progressBar.style.width = scrollable > 0
+            ? ((window.scrollY / scrollable) * 100) + '%' : '0%';
+        };
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        updateProgress();
+      }
+
+      /* ── Scroll-to-top ─────────────────────────────────────── */
+      const scrollTopBtn = document.querySelector('.scroll-top');
+      if (scrollTopBtn) {
+        window.addEventListener('scroll', () => {
+          scrollTopBtn.classList.toggle('is-visible', window.scrollY > 300);
+        }, { passive: true });
+        scrollTopBtn.addEventListener('click', () =>
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        );
+      }
+
+      /* ── Spotlight ─────────────────────────────────────────── */
+      const spotlightEl = document.querySelector('.spotlight');
+      if (spotlightEl) {
+        document.addEventListener('mousemove', (e) => {
+          spotlightEl.style.setProperty('--cx', e.clientX + 'px');
+          spotlightEl.style.setProperty('--cy', e.clientY + 'px');
+        }, { passive: true });
+      }
+
+      /* ── Card tilt ─────────────────────────────────────────── */
+      const noHover = window.matchMedia('(hover: none)').matches;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!noHover && !reducedMotion) {
+        document.querySelectorAll('.card').forEach((card) => {
+          card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / r.width - 0.5) * 2;
+            const y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+            card.style.transform =
+              `perspective(700px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg)`;
+          });
+          card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+        });
+      }
+
+      /* ── Magnetic buttons ──────────────────────────────────── */
+      if (!noHover && !reducedMotion) {
+        document.querySelectorAll('.btn--primary, .btn--accent, .nav__cta').forEach((btn) => {
+          btn.addEventListener('mousemove', (e) => {
+            const r = btn.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width / 2) * 0.28;
+            const y = (e.clientY - r.top - r.height / 2) * 0.28;
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+          });
+          btn.addEventListener('mouseleave', () => {
+            btn.style.transition = 'transform 0.4s var(--ease)';
+            btn.style.transform = '';
+            setTimeout(() => { btn.style.transition = ''; }, 400);
+          });
+        });
+      }
+
+      /* ── Typewriter (home eyebrow only) ────────────────────── */
+      const twEl = document.querySelector('[data-typewriter]');
+      if (twEl && !reducedMotion) {
+        const text = twEl.textContent.trim();
+        twEl.textContent = '';
+        twEl.classList.add('typewriter');
+        let i = 0;
+        const type = () => {
+          twEl.textContent = text.slice(0, i++);
+          if (i <= text.length) setTimeout(type, 38);
+          else twEl.classList.remove('typewriter');
+        };
+        setTimeout(type, 500);
+      }
+
+      /* ── Copy email ────────────────────────────────────────── */
+      document.querySelectorAll('[data-copy-email]').forEach((el) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          navigator.clipboard.writeText(el.dataset.copyEmail)
+            .then(() => showToast('Email copied ✓'))
+            .catch(() => showToast('Copy failed: ' + el.dataset.copyEmail));
+        });
+      });
+
+      /* ── Keyboard shortcuts ────────────────────────────────── */
+      const kbdPanel = document.querySelector('.kbd-panel');
+      const githubUrl = document.body.dataset.github || 'https://github.com';
+      const openKbd  = () => kbdPanel?.classList.add('is-open');
+      const closeKbd = () => kbdPanel?.classList.remove('is-open');
+
+      kbdPanel?.addEventListener('click', (e) => {
+        if (e.target === kbdPanel) closeKbd();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        const active = document.activeElement;
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) return;
+        if (kbdPanel?.classList.contains('is-open')) {
+          if (e.key === 'Escape') closeKbd();
+          return;
+        }
+        switch (e.key) {
+          case '?':                     openKbd(); break;
+          case 'Escape':                closeKbd(); break;
+          case 't': case 'T': {
+            const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, next);
+            applyTheme(next);
+            break;
+          }
+          case 'h': case 'H':  window.location.href = '/'; break;
+          case 'p': case 'P':  window.location.href = '/projects'; break;
+          case 'w': case 'W':  window.location.href = '/work'; break;
+          case 'g': case 'G':  window.open(githubUrl, '_blank', 'noopener'); break;
+        }
+      });
     </script>
   </body>
 </html>

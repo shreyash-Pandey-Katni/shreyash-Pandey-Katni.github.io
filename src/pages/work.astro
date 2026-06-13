@@ -8,10 +8,13 @@ import {
   workPrinciples,
   capabilityGroups,
   primaryContactHref,
+  pageMeta,
 } from '../data/siteContent';
+
+const { title, description } = pageMeta['/work'];
 ---
 
-<BaseLayout title="Work">
+<BaseLayout title={title} description={description}>
   {/* ===== TITLE ===== */}
   <section class="page__section">
     <div class="bento">

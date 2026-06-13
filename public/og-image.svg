@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1C1C1E"/>
+      <stop offset="100%" stop-color="#2C2C2E"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Accent bar top-left -->
+  <rect x="80" y="80" width="6" height="80" rx="3" fill="url(#accent)"/>
+
+  <!-- Name -->
+  <text x="106" y="134" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="700" fill="#FFFFFF" letter-spacing="-1">Shreyash Pandey</text>
+
+  <!-- Role pill -->
+  <rect x="106" y="156" width="340" height="44" rx="22" fill="#4F46E5" opacity="0.9"/>
+  <text x="126" y="184" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="600" fill="#FFFFFF">AI Systems Engineer</text>
+
+  <!-- Location -->
+  <text x="486" y="184" font-family="system-ui, -apple-system, sans-serif" font-size="17" fill="rgba(255,255,255,0.45)">· Bengaluru, India</text>
+
+  <!-- Divider -->
+  <line x1="80" y1="240" x2="1120" y2="240" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+  <!-- Proof stats row -->
+  <!-- Stat 1 -->
+  <text x="106" y="308" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF">5K+</text>
+  <text x="106" y="336" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="rgba(255,255,255,0.5)">test locators auto-healed</text>
+
+  <!-- Stat 2 -->
+  <text x="340" y="308" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF">125M</text>
+  <text x="340" y="336" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="rgba(255,255,255,0.5)">params, LLM trained from scratch</text>
+
+  <!-- Stat 3 -->
+  <text x="680" y="308" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF">70%</text>
+  <text x="680" y="336" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="rgba(255,255,255,0.5)">fewer support tickets via AI chatbot</text>
+
+  <!-- Stat 4 -->
+  <text x="960" y="308" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF">IBM</text>
+  <text x="960" y="336" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="rgba(255,255,255,0.5)">SDE2 · Software Labs</text>
+
+  <!-- Skill chips row -->
+  <!-- PyTorch -->
+  <rect x="106" y="390" width="96" height="34" rx="17" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="154" y="412" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">PyTorch</text>
+  <!-- LangChain -->
+  <rect x="212" y="390" width="104" height="34" rx="17" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="264" y="412" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">LangChain</text>
+  <!-- Java -->
+  <rect x="326" y="390" width="72" height="34" rx="17" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="362" y="412" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Java</text>
+  <!-- Microservices -->
+  <rect x="408" y="390" width="138" height="34" rx="17" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="477" y="412" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Microservices</text>
+  <!-- Agent Systems -->
+  <rect x="556" y="390" width="140" height="34" rx="17" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="626" y="412" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Agent Systems</text>
+  <!-- FAISS -->
+  <rect x="706" y="390" width="72" height="34" rx="17" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="742" y="412" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">FAISS</text>
+
+  <!-- Bottom URL -->
+  <text x="106" y="552" font-family="ui-monospace, monospace" font-size="18" fill="rgba(255,255,255,0.3)">shreyash.co.in</text>
+
+  <!-- Bottom-right: open to work badge -->
+  <rect x="940" y="520" width="174" height="42" rx="21" fill="url(#accent)" opacity="0.85"/>
+  <text x="1027" y="547" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600" fill="#FFFFFF">Open to work ✓</text>
+</svg>

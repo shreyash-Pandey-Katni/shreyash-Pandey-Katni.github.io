@@ -7,6 +7,7 @@ import {
   flagshipProjects,
   archiveProjects,
   siteMeta,
+  pageMeta,
 } from '../data/siteContent';
 
 /* Highlight known keywords with monospace styling */
@@ -31,9 +32,11 @@ function highlightKeywords(text: string) {
       : part
   ).join('');
 }
+
+const { title, description } = pageMeta['/projects'];
 ---
 
-<BaseLayout title="Projects">
+<BaseLayout title={title} description={description}>
   {/* ===== TITLE ROW ===== */}
   <section class="page__section">
     <div class="bento reveal-stagger">
@@ -58,8 +61,8 @@ function highlightKeywords(text: string) {
     <div class="bento reveal-stagger">
       {flagshipProjects.map((proj, i) => {
         const isDark = i === 0 || i === 3;
-        // Keep row balance in 4-col grid: first row 2+2, second row 1+1+2.
-        const isWide = i === 0 || i === 1 || i === 4;
+        // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2.
+        const isWide = i === 0 || i === 1 || i === 4 || i === 7;
         const spanClass = isWide ? 'span-2' : '';
         const isModelCard = proj.ctaLabel === 'View model card';
         const ctaVariant = isDark ? 'ghost' : isModelCard ? 'accent' : 'ghost';
@@ -91,7 +94,7 @@ function highlightKeywords(text: string) {
             </p>
 
             {/* Skills */}
-            <div class="chip-grid" style={proj.href ? 'margin-bottom: 16px;' : ''}>
+            <div class="chip-grid" style="margin-bottom: 16px;">
               {proj.skills.map((s) => (
                 <span class={`chip${isDark ? ' chip--dark' : ' chip--outline'}`}>
                   {s}
@@ -100,18 +103,25 @@ function highlightKeywords(text: string) {
             </div>
 
             {/* CTA */}
-            {proj.href && (
-              <div class="card__footer">
+            <div class="card__footer" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <ActionLink
+                href={`/projects/${proj.slug}`}
+                label="View details →"
+                variant={ctaVariant}
+                small={true}
+                class={ctaClass}
+              />
+              {proj.href && (
                 <ActionLink
                   href={proj.href}
                   external={true}
                   label={proj.ctaLabel || 'View project'}
-                  variant={ctaVariant}
+                  variant="ghost"
                   small={true}
                   class={ctaClass}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </Reveal>
         );
       })}
