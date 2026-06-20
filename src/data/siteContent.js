@@ -1496,6 +1496,9 @@ export const skillGroups = [
       "Langfuse",
       "A/B testing",
       "OCR",
+      "GraphRAG",
+      "Qdrant",
+      "LiteLLM",
     ],
   },
   {
@@ -1524,6 +1527,11 @@ export const skillGroups = [
       "Cassandra",
       "Redis",
       "pgvector",
+      "PostgreSQL",
+      "Neo4j",
+      "Kubernetes",
+      "OpenTelemetry",
+      "Prometheus",
     ],
   },
 ];
