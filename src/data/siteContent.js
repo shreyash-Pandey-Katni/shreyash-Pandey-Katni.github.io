@@ -1340,15 +1340,46 @@ export const roadmapProjects = [
   {
     status: "In progress",
     title: "KiranaIQ",
+    wide: true,
     summary:
-      "A demand-forecasting and inventory copilot for Indian kirana stores, with LightGBM forecasts, SHAP explanations, A/B testing, OCR, and a Telegram bot.",
+      "A demand-forecasting and inventory copilot for small Indian kirana stores: snap a bill, get per-SKU forecasts, plain-language explanations, reorder quantities, and price experiments.",
+    details:
+      "KiranaIQ bundles five capabilities that small retailers have no analytics for today: reading a paper bill, forecasting demand per item, explaining the forecast, recommending what and how much to reorder, and testing price changes safely. It is the flagship for classical and forecasting ML, explainability, and applied product engineering.",
+    highlights: [
+      "Per-SKU demand forecasting with a global LightGBM model (Tweedie) against seasonal-naive and AutoETS baselines: measured WAPE 35.8 percent versus 62.1 percent for seasonal-naive on synthetic retail data.",
+      "SHAP turns every forecast into plain language a shopkeeper understands (festivals, paydays, day-of-week effects).",
+      "OCR ingestion reads a photo of a bill or GST invoice into structured SKU-level line items, with reconciliation checks.",
+      "Newsvendor reorder quantities plus market-basket cross-sell, and an A/B harness (Bayesian and sequential tests) for price and promo experiments.",
+      "Telegram-bot interface (built, token-gated, 17 handler tests). Telegram is currently restricted in India, so the live bot runs behind a VPN or a cloud host; 64 tests passing overall.",
+    ],
+    stack: ["Python", "LightGBM", "SHAP", "StatsForecast", "OCR", "FastAPI", "python-telegram-bot", "pandas"],
+    stats: [
+      { value: "35.8%", label: "Forecast WAPE (vs 62.1% naive)" },
+      { value: "64", label: "Tests passing" },
+      { value: "5-in-1", label: "Forecast, SHAP, OCR, recsys, A/B" },
+    ],
     href: "https://github.com/shreyash-Pandey-Katni/KiranaIQ",
   },
   {
     status: "In progress",
     title: "hybrid-search-bench",
+    wide: true,
     summary:
-      "BM25, SPLADE, and dense retrieval combined with a LambdaMART learning-to-rank reranker, benchmarked on BEIR.",
+      "An honest hybrid-retrieval benchmark: BM25, SPLADE, and dense retrieval, fused and then reranked by a LambdaMART learning-to-rank model, measured on a public BEIR dataset.",
+    details:
+      "Three retrieval legs are evaluated on the same qrels, fused with reciprocal-rank fusion, and then reordered by a learning-to-rank reranker trained on the train split. It is the flagship for search, ranking, and the classical learning-to-rank skills that pure-LLM portfolios usually miss.",
+    highlights: [
+      "Three legs on the same BEIR qrels: BM25 (bm25s), SPLADE learned-sparse (sentence-transformers), and a dense bi-encoder over FAISS.",
+      "Reciprocal-rank-fusion baseline, then a LightGBM LambdaMART reranker over the fused candidates (per-leg scores, ranks, and agreement features).",
+      "BEIR SciFact: LambdaMART nDCG@10 0.778 versus 0.728 for RRF fusion, a 6.9 percent lift; MRR 0.761, a 9.1 percent lift.",
+      "BM25 at nDCG@10 0.686 matches the published BEIR figure, anchoring the pipeline as correct rather than flattering.",
+    ],
+    stack: ["Python", "bm25s", "SPLADE", "FAISS", "LightGBM (LambdaMART)", "BEIR / ir_datasets", "ranx"],
+    stats: [
+      { value: "0.778", label: "nDCG@10 (LambdaMART)" },
+      { value: "+6.9%", label: "Lift over RRF fusion" },
+      { value: "4", label: "Retrieval methods compared" },
+    ],
     href: "https://github.com/shreyash-Pandey-Katni/hybrid-search-bench",
   },
   {
