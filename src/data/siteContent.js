@@ -1317,8 +1317,24 @@ export const roadmapProjects = [
   {
     status: "In progress",
     title: "PaperGraph",
+    wide: true,
     summary:
-      "GraphRAG over research papers paired with an LLM firewall, instrumented with Langfuse tracing and RAGAS evaluation, deploying to GCP Cloud Run.",
+      "GraphRAG question-answering over a curated corpus of research papers, fronted by a four-layer LLM firewall, with offline RAGAS evaluation and self-hosted Langfuse tracing, packaged for GCP Cloud Run.",
+    details:
+      "PaperGraph answers questions over research papers by fusing a Neo4j knowledge graph with vector retrieval, then guards the entire path with an LLM firewall built to survive untrusted input. It is the flagship artifact for production RAG, AI safety, and LLM observability.",
+    highlights: [
+      "GraphRAG retrieval: Neo4j knowledge-graph traversal plus vector search (pgvector and Chroma), fused with reciprocal-rank fusion.",
+      "Four-layer LLM firewall: input intent-gate, retrieved-chunk sanitizer (an indirect prompt-injection defense), output guard, and per-IP rate plus token and cost caps.",
+      "Measured 100 percent injection-block rate on a 20-prompt adversarial set, with zero false positives on benign questions.",
+      "Offline RAGAS evaluation (faithfulness and context-precision) and self-hosted Langfuse tracing of latency, token cost, and retrieval hits.",
+      "Dockerized for GCP Cloud Run at roughly zero cost at portfolio scale, with 45 passing tests.",
+    ],
+    stack: ["Python", "FastAPI", "Neo4j", "pgvector", "Chroma", "Langfuse", "RAGAS", "Ollama", "Llama Guard", "Docker", "GCP Cloud Run"],
+    stats: [
+      { value: "100%", label: "Injection-block rate" },
+      { value: "4-layer", label: "LLM firewall" },
+      { value: "45", label: "Tests passing" },
+    ],
     href: "https://github.com/shreyash-Pandey-Katni/papergraph",
   },
   {
