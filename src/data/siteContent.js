@@ -1187,6 +1187,103 @@ export const flagshipProjects = [
       "Feeds the same DhanHQ market data that the Rust hot path in ATIS consumes, so the broker integration is shared across my trading work.",
     ],
   },
+  {
+    year: "2026",
+    title: "CodeAtlas",
+    slug: "codeatlas",
+    category: "Code comprehension tool",
+    status: "Released",
+    tagline: "Paste C source code, get an interactive Mermaid flowchart for every function, rendered on a Figma-like canvas with zoom, pan, and SVG or PNG export.",
+    summary:
+      "A code comprehension tool that turns C source into per-function Mermaid flowcharts, with two interchangeable engines: a deterministic AST path and an LLM path, served over a FastAPI backend and a React canvas.",
+    details:
+      "The same backend exposes two diagram modes selected by an environment flag. AST mode parses C with ast-grep and emits Mermaid directly, fast and deterministic with no model in the loop. LLM mode sends each function to a model through LiteLLM, so it works against local Ollama, GitHub Models, OpenAI, or Anthropic without code changes.",
+    proof: "Two diagram engines (AST and LLM), four-service Docker stack, default to local Ollama so it runs free and offline.",
+    why: "Reading unfamiliar C is slow, and most diagram tools either need a heavy IDE or hand-drawing. I wanted to paste a file and immediately see the control flow per function. Building both an AST engine and an LLM engine forced a clean separation: the deterministic path proves correctness and runs without a model, while the LLM path adds richer narration when a backend is available.",
+    skills: ["FastAPI", "ast-grep", "LiteLLM", "React", "TypeScript", "Mermaid", "WebSocket", "Docker"],
+    href: "https://github.com/shreyash-Pandey-Katni/CodeAtlas",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "2", label: "Diagram engines (AST + LLM)" },
+      { value: "4", label: "Dockerized services" },
+      { value: "Local", label: "Default LLM via Ollama" },
+    ],
+    architecture: [
+      {
+        name: "Two diagram engines",
+        html: `<ul class="bullet-list">
+  <li><span><strong>AST mode</strong> · ast-grep parses C and emits Mermaid directly, deterministic, no model needed</span></li>
+  <li><span><strong>LLM mode</strong> · each function sent through LiteLLM with few-shot prompts for richer diagrams</span></li>
+  <li><span><strong>Provider agnostic</strong> · Ollama, GitHub Models, OpenAI, or Anthropic, switched by config</span></li>
+  <li><span><strong>Persistence</strong> · aiosqlite stores parsed functions and generated diagrams</span></li>
+</ul>`,
+      },
+      {
+        name: "Frontend canvas",
+        description: "React 19 and TypeScript with Tailwind and Mermaid 11, built with Vite and served by Nginx, which also proxies the API and the WebSocket back to the FastAPI backend. The canvas supports zoom, pan, and SVG or PNG export per function.",
+      },
+    ],
+    techStack: {
+      core: ["FastAPI (Python 3.11)", "ast-grep-py", "LiteLLM", "aiosqlite", "Uvicorn"],
+      infra: ["Docker Compose (4 services)", "Nginx (SPA + API/WS proxy)", "Ollama (local LLM)"],
+      tools: ["React 19", "TypeScript", "Tailwind CSS 4", "Mermaid 11", "Vite"],
+    },
+    highlights: [
+      "Two interchangeable diagram engines from one backend: a deterministic ast-grep AST path that needs no model, and an LLM path for richer diagrams.",
+      "LLM calls go through LiteLLM, so the same code runs against local Ollama, GitHub Models, OpenAI, or Anthropic, selected by configuration.",
+      "React 19 and TypeScript canvas renders Mermaid per function with zoom, pan, and SVG or PNG export.",
+      "Ships as a four-service Docker Compose stack and defaults to local Ollama, so it runs free and offline out of the box.",
+    ],
+  },
+  {
+    year: "2026",
+    title: "GraphMind",
+    slug: "graphmind",
+    category: "GraphRAG knowledge graph",
+    status: "Released",
+    tagline: "A GraphRAG system over financial trade data that fuses a Neo4j knowledge graph, dense vector search, and BM25 into one retrieval surface for a LangGraph agent.",
+    summary:
+      "A GraphRAG build that ingests trade and research data into a Neo4j knowledge graph and a ChromaDB vector store, then answers questions through a LangGraph ReAct agent that picks between graph traversal, dense retrieval, and hybrid search.",
+    details:
+      "Retrieval is three-pronged: Neo4j Cypher for multi-hop relationship questions (which analysts covered an instrument, how funds connect to trades to sectors), dense vectors for semantic similarity, and BM25 for exact terms like tickers. Dense and sparse results are merged with Reciprocal Rank Fusion so meaning and exact-match both count.",
+    proof: "Neo4j + ChromaDB + BM25 fused via Reciprocal Rank Fusion, exposed as tools to a LangGraph ReAct agent.",
+    why: "Pure vector RAG misses relationship questions, and a pure knowledge graph misses fuzzy semantic ones. Financial data needs both, plus exact-match on tickers like HDFCBANK that embeddings smear together. Building all three retrievers and fusing them taught me where each one breaks and why a hybrid, agent-routed approach beats any single retriever.",
+    skills: ["GraphRAG", "Neo4j", "Cypher", "ChromaDB", "BM25", "LangGraph", "NetworkX", "Reciprocal Rank Fusion"],
+    href: "https://github.com/shreyash-Pandey-Katni/GraphMind",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "3", label: "Retrievers fused (graph + dense + BM25)" },
+      { value: "RRF", label: "Reciprocal Rank Fusion merge" },
+      { value: "ReAct", label: "LangGraph agent routing" },
+    ],
+    architecture: [
+      {
+        name: "Three retrievers, one agent",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Knowledge graph</strong> · Neo4j Cypher for multi-hop analyst, fund, trade, instrument, and sector relationships</span></li>
+  <li><span><strong>Dense</strong> · ChromaDB vector search over sentence-transformer embeddings</span></li>
+  <li><span><strong>Sparse</strong> · BM25Okapi for exact terms like tickers</span></li>
+  <li><span><strong>Fusion</strong> · dense and BM25 merged with Reciprocal Rank Fusion before ranking</span></li>
+  <li><span><strong>Routing</strong> · a LangGraph ReAct agent picks the right tool per question</span></li>
+</ul>`,
+      },
+      {
+        name: "Graph ingestion and constraints",
+        description: "Uniqueness constraints on Instrument, Fund, Trade, Analyst, and Sector nodes are created before ingestion so repeated MERGE statements never silently duplicate nodes. NetworkX handles the smaller in-process graph and visualization alongside the Neo4j store.",
+      },
+    ],
+    techStack: {
+      core: ["Neo4j 5.20", "Cypher", "ChromaDB", "rank_bm25 (BM25Okapi)", "sentence-transformers"],
+      infra: ["LangGraph", "LangChain", "neo4j Python driver", "Docker Compose"],
+      tools: ["NetworkX", "Reciprocal Rank Fusion", "spaCy", "Ollama"],
+    },
+    highlights: [
+      "Fuses three retrievers, a Neo4j knowledge graph, ChromaDB dense vectors, and BM25, into a single retrieval surface.",
+      "Dense and sparse results are combined with Reciprocal Rank Fusion, so semantic meaning and exact-match terms like tickers both contribute.",
+      "A LangGraph ReAct agent routes each question to graph traversal, vector search, or hybrid retrieval as the question demands.",
+      "Uniqueness constraints on Instrument, Fund, Trade, Analyst, and Sector nodes prevent duplicate graph nodes during MERGE-based ingestion.",
+    ],
+  },
 ];
 
 export const archiveProjects = [
@@ -1213,6 +1310,37 @@ export const archiveProjects = [
     title: "Library Management",
     summary:
       "A MERN-stack build that sharpened my full-stack fundamentals around CRUD, search, and practical product structure.",
+  },
+];
+
+export const roadmapProjects = [
+  {
+    status: "In progress",
+    title: "PaperGraph",
+    summary:
+      "GraphRAG over research papers paired with an LLM firewall, instrumented with Langfuse tracing and RAGAS evaluation, deploying to GCP Cloud Run.",
+    href: "https://github.com/shreyash-Pandey-Katni/papergraph",
+  },
+  {
+    status: "In progress",
+    title: "KiranaIQ",
+    summary:
+      "A demand-forecasting and inventory copilot for Indian kirana stores, with LightGBM forecasts, SHAP explanations, A/B testing, OCR, and a Telegram bot.",
+    href: "https://github.com/shreyash-Pandey-Katni/KiranaIQ",
+  },
+  {
+    status: "In progress",
+    title: "hybrid-search-bench",
+    summary:
+      "BM25, SPLADE, and dense retrieval combined with a LambdaMART learning-to-rank reranker, benchmarked on BEIR.",
+    href: "https://github.com/shreyash-Pandey-Katni/hybrid-search-bench",
+  },
+  {
+    status: "Planned",
+    title: "KiranaIQ forecasting v2",
+    summary:
+      "Improve KiranaIQ forecasting accuracy with intermittent-demand handling and a single global model across stores.",
+    href: "https://github.com/shreyash-Pandey-Katni/KiranaIQ",
   },
 ];
 
@@ -1364,6 +1492,8 @@ export const projectsContent = {
     "The portfolio is now anchored around AI-heavy, backend-heavy projects that better reflect the direction I am taking professionally: model building, agent orchestration, secure autonomy, and workflow engineering.",
   archiveIntro:
     "Before the current generation of work, I used smaller ML and web projects to build the habits that still matter now: experimentation, debugging, and shipping complete systems.",
+  roadmapIntro:
+    "What I am building next. These are active repositories, shared early while the systems take shape.",
 };
 
 export const workContent = {

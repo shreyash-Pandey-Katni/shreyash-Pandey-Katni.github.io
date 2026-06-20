@@ -6,6 +6,7 @@ import {
   projectsContent,
   flagshipProjects,
   archiveProjects,
+  roadmapProjects,
   siteMeta,
   pageMeta,
 } from '../data/siteContent';
@@ -144,6 +145,36 @@ const { title, description } = pageMeta['/projects'];
             {proj.title}
           </h3>
           <p class="t-small">{proj.summary}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== ROADMAP / IN PROGRESS ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 8px;">In progress</p>
+      <p class="t-body" style="margin-bottom: 20px; max-width: 600px;">
+        {projectsContent.roadmapIntro}
+      </p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {roadmapProjects.map((proj) => (
+        <Reveal class="card card--compact card--ghost">
+          <p class="t-eyebrow card__eyebrow">{proj.status}</p>
+          <h3 class="t-subheading card__title" style="font-size: 1rem;">
+            {proj.title}
+          </h3>
+          <p class="t-small" style="margin-bottom: 12px;">{proj.summary}</p>
+          {proj.href && (
+            <ActionLink
+              href={proj.href}
+              external={true}
+              label="View on GitHub →"
+              variant="ghost"
+              small={true}
+            />
+          )}
         </Reveal>
       ))}
     </div>
