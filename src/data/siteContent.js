@@ -149,6 +149,10 @@ export const capabilityGroups = [
       "LangChain",
       "Computer vision",
       "FAISS",
+      "LightGBM",
+      "SHAP",
+      "Learning-to-rank",
+      "RAGAS",
     ],
   },
   {
@@ -194,7 +198,7 @@ export const flagshipProjects = [
       "The project is an end-to-end exercise in model building: corpus curation, tokenization, training stability, benchmarking, and open-source packaging.",
     proof: "~2B tokens processed, Apache 2.0 release, WinoGrande 0.507.",
     why: "I wanted to learn how LLMs actually work, not from an API, but by building one end-to-end. With a single 3080 Ti, training a 125M model from scratch was the right scope: ambitious enough to be real, small enough to be feasible on consumer hardware. Every decision, from architecture to data pipeline to training stability, was a lesson I could not have learned any other way.",
-    skills: ["PyTorch", "Transformers", "Tokenization", "Benchmarking", "Distributed training"],
+    skills: ["PyTorch", "Transformers", "Tokenization", "Benchmarking", "Distributed training", "MLflow", "Weights & Biases", "DVC"],
     href: "https://huggingface.co/shreyash-Pandey-Katni/phoenix-125m",
     ctaLabel: "View model card",
     stats: [
@@ -307,7 +311,7 @@ export const flagshipProjects = [
     techStack: {
       core: ["PyTorch 2.x", "HuggingFace Transformers", "BPE Tokenizer (32K)", "FlashAttention", "RoPE", "SwiGLU", "RMSNorm"],
       infra: ["RTX 3080 Ti (12 GB VRAM)", "NAS via SMB", "Ray (distributed preprocessing)"],
-      tools: ["MinHash LSH dedup", "XLM-RoBERTa (lang detect + PII)", "PyMuPDF", "BeautifulSoup"],
+      tools: ["MinHash LSH dedup", "XLM-RoBERTa (lang detect + PII)", "PyMuPDF", "BeautifulSoup", "MLflow + W&B (experiment tracking)", "DVC (data versioning)"],
     },
     highlights: [
       "Trained a 125M parameter LLM from scratch on a single consumer GPU. No cloud, no distributed training.",
@@ -656,8 +660,8 @@ export const flagshipProjects = [
     title: "Rudra",
     slug: "rudra",
     category: "Autonomous AI security orchestrator",
-    status: "Parked",
-    statusNote: "Frontier LLMs (Claude, GPT-4) have tightened restrictions on offensive security tasks. Smaller local models via Ollama lack the reasoning depth needed for the exploit loop. Two agents are fully implemented. Parked until the model landscape shifts.",
+    status: "Working on it",
+    statusNote: "In active development. Two agents are fully implemented with LangGraph orchestration, LiteLLM model routing across local models, and Qdrant vector memory; the exploit and reporting loop is being expanded.",
     tagline: "An autonomous multi-agent offensive security platform for creative, non-templated vulnerability exploitation.",
     summary:
       "A multi-agent offensive security architecture built around strict scope guardrails, sandboxed execution, and auditable event-driven workflows.",
@@ -1187,6 +1191,248 @@ export const flagshipProjects = [
       "Feeds the same DhanHQ market data that the Rust hot path in ATIS consumes, so the broker integration is shared across my trading work.",
     ],
   },
+  {
+    year: "2026",
+    title: "CodeAtlas",
+    slug: "codeatlas",
+    category: "Code comprehension tool",
+    status: "Released",
+    tagline: "Paste C source code, get an interactive Mermaid flowchart for every function, rendered on a Figma-like canvas with zoom, pan, and SVG or PNG export.",
+    summary:
+      "A code comprehension tool that turns C source into per-function Mermaid flowcharts, with two interchangeable engines: a deterministic AST path and an LLM path, served over a FastAPI backend and a React canvas.",
+    details:
+      "The same backend exposes two diagram modes selected by an environment flag. AST mode parses C with ast-grep and emits Mermaid directly, fast and deterministic with no model in the loop. LLM mode sends each function to a model through LiteLLM, so it works against local Ollama, GitHub Models, OpenAI, or Anthropic without code changes.",
+    proof: "Two diagram engines (AST and LLM), four-service Docker stack, default to local Ollama so it runs free and offline.",
+    why: "Reading unfamiliar C is slow, and most diagram tools either need a heavy IDE or hand-drawing. I wanted to paste a file and immediately see the control flow per function. Building both an AST engine and an LLM engine forced a clean separation: the deterministic path proves correctness and runs without a model, while the LLM path adds richer narration when a backend is available.",
+    skills: ["FastAPI", "ast-grep", "LiteLLM", "React", "TypeScript", "Mermaid", "WebSocket", "Docker"],
+    href: "https://github.com/shreyash-Pandey-Katni/CodeAtlas",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "2", label: "Diagram engines (AST + LLM)" },
+      { value: "4", label: "Dockerized services" },
+      { value: "Local", label: "Default LLM via Ollama" },
+    ],
+    architecture: [
+      {
+        name: "Two diagram engines",
+        html: `<ul class="bullet-list">
+  <li><span><strong>AST mode</strong> · ast-grep parses C and emits Mermaid directly, deterministic, no model needed</span></li>
+  <li><span><strong>LLM mode</strong> · each function sent through LiteLLM with few-shot prompts for richer diagrams</span></li>
+  <li><span><strong>Provider agnostic</strong> · Ollama, GitHub Models, OpenAI, or Anthropic, switched by config</span></li>
+  <li><span><strong>Persistence</strong> · aiosqlite stores parsed functions and generated diagrams</span></li>
+</ul>`,
+      },
+      {
+        name: "Frontend canvas",
+        description: "React 19 and TypeScript with Tailwind and Mermaid 11, built with Vite and served by Nginx, which also proxies the API and the WebSocket back to the FastAPI backend. The canvas supports zoom, pan, and SVG or PNG export per function.",
+      },
+    ],
+    techStack: {
+      core: ["FastAPI (Python 3.11)", "ast-grep-py", "LiteLLM", "aiosqlite", "Uvicorn"],
+      infra: ["Docker Compose (4 services)", "Nginx (SPA + API/WS proxy)", "Ollama (local LLM)"],
+      tools: ["React 19", "TypeScript", "Tailwind CSS 4", "Mermaid 11", "Vite"],
+    },
+    highlights: [
+      "Two interchangeable diagram engines from one backend: a deterministic ast-grep AST path that needs no model, and an LLM path for richer diagrams.",
+      "LLM calls go through LiteLLM, so the same code runs against local Ollama, GitHub Models, OpenAI, or Anthropic, selected by configuration.",
+      "React 19 and TypeScript canvas renders Mermaid per function with zoom, pan, and SVG or PNG export.",
+      "Ships as a four-service Docker Compose stack and defaults to local Ollama, so it runs free and offline out of the box.",
+    ],
+  },
+  {
+    year: "2026",
+    title: "GraphMind",
+    slug: "graphmind",
+    category: "GraphRAG knowledge graph",
+    status: "Released",
+    tagline: "A GraphRAG system over financial trade data that fuses a Neo4j knowledge graph, dense vector search, and BM25 into one retrieval surface for a LangGraph agent.",
+    summary:
+      "A GraphRAG build that ingests trade and research data into a Neo4j knowledge graph and a ChromaDB vector store, then answers questions through a LangGraph ReAct agent that picks between graph traversal, dense retrieval, and hybrid search.",
+    details:
+      "Retrieval is three-pronged: Neo4j Cypher for multi-hop relationship questions (which analysts covered an instrument, how funds connect to trades to sectors), dense vectors for semantic similarity, and BM25 for exact terms like tickers. Dense and sparse results are merged with Reciprocal Rank Fusion so meaning and exact-match both count.",
+    proof: "Neo4j + ChromaDB + BM25 fused via Reciprocal Rank Fusion, exposed as tools to a LangGraph ReAct agent.",
+    why: "Pure vector RAG misses relationship questions, and a pure knowledge graph misses fuzzy semantic ones. Financial data needs both, plus exact-match on tickers like HDFCBANK that embeddings smear together. Building all three retrievers and fusing them taught me where each one breaks and why a hybrid, agent-routed approach beats any single retriever.",
+    skills: ["GraphRAG", "Neo4j", "Cypher", "ChromaDB", "BM25", "LangGraph", "NetworkX", "Reciprocal Rank Fusion"],
+    href: "https://github.com/shreyash-Pandey-Katni/GraphMind",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "3", label: "Retrievers fused (graph + dense + BM25)" },
+      { value: "RRF", label: "Reciprocal Rank Fusion merge" },
+      { value: "ReAct", label: "LangGraph agent routing" },
+    ],
+    architecture: [
+      {
+        name: "Three retrievers, one agent",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Knowledge graph</strong> · Neo4j Cypher for multi-hop analyst, fund, trade, instrument, and sector relationships</span></li>
+  <li><span><strong>Dense</strong> · ChromaDB vector search over sentence-transformer embeddings</span></li>
+  <li><span><strong>Sparse</strong> · BM25Okapi for exact terms like tickers</span></li>
+  <li><span><strong>Fusion</strong> · dense and BM25 merged with Reciprocal Rank Fusion before ranking</span></li>
+  <li><span><strong>Routing</strong> · a LangGraph ReAct agent picks the right tool per question</span></li>
+</ul>`,
+      },
+      {
+        name: "Graph ingestion and constraints",
+        description: "Uniqueness constraints on Instrument, Fund, Trade, Analyst, and Sector nodes are created before ingestion so repeated MERGE statements never silently duplicate nodes. NetworkX handles the smaller in-process graph and visualization alongside the Neo4j store.",
+      },
+    ],
+    techStack: {
+      core: ["Neo4j 5.20", "Cypher", "ChromaDB", "rank_bm25 (BM25Okapi)", "sentence-transformers"],
+      infra: ["LangGraph", "LangChain", "neo4j Python driver", "Docker Compose"],
+      tools: ["NetworkX", "Reciprocal Rank Fusion", "spaCy", "Ollama"],
+    },
+    highlights: [
+      "Fuses three retrievers, a Neo4j knowledge graph, ChromaDB dense vectors, and BM25, into a single retrieval surface.",
+      "Dense and sparse results are combined with Reciprocal Rank Fusion, so semantic meaning and exact-match terms like tickers both contribute.",
+      "A LangGraph ReAct agent routes each question to graph traversal, vector search, or hybrid retrieval as the question demands.",
+      "Uniqueness constraints on Instrument, Fund, Trade, Analyst, and Sector nodes prevent duplicate graph nodes during MERGE-based ingestion.",
+    ],
+  },
+  {
+    year: "2026",
+    title: "PaperGraph",
+    slug: "papergraph",
+    category: "GraphRAG with an LLM firewall",
+    status: "Built",
+    tagline: "GraphRAG question-answering over research papers, fronted by a four-layer LLM firewall, with offline RAGAS evaluation and self-hosted Langfuse tracing, packaged for GCP Cloud Run.",
+    summary:
+      "GraphRAG question-answering over a curated corpus of research papers, fronted by a four-layer LLM firewall, with offline RAGAS evaluation and self-hosted Langfuse tracing, packaged for GCP Cloud Run.",
+    details:
+      "PaperGraph fuses a Neo4j knowledge graph with vector retrieval, then guards the entire path with an LLM firewall built to survive untrusted input. It is the flagship for production RAG, AI safety, and LLM observability.",
+    proof: "100% injection-block on a 20-prompt adversarial set, offline RAGAS + Langfuse, 45 tests passing.",
+    why: "Most RAG demos quietly assume the retrieved text is friendly. I wanted the opposite: a GraphRAG pipeline that treats its own corpus as potentially hostile, wrapped in a firewall I could measure against real adversarial prompts, with the evaluation and tracing a production system needs instead of a notebook screenshot.",
+    skills: ["GraphRAG", "Neo4j", "pgvector", "Prompt-injection defense", "RAGAS", "Langfuse", "FastAPI", "Docker"],
+    href: "https://github.com/shreyash-Pandey-Katni/papergraph",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "100%", label: "Injection-block rate (20 adversarial prompts)" },
+      { value: "4-layer", label: "LLM firewall" },
+      { value: "45", label: "Tests passing" },
+    ],
+    architecture: [
+      {
+        name: "Four-layer LLM firewall",
+        html: `<ul class="bullet-list">
+  <li><span><strong>Input intent-gate</strong> · classifies and blocks hostile prompts before retrieval</span></li>
+  <li><span><strong>Chunk sanitizer</strong> · defuses indirect prompt-injection hidden in retrieved text</span></li>
+  <li><span><strong>Output guard</strong> · checks generations before they reach the user</span></li>
+  <li><span><strong>Rate + cost caps</strong> · per-IP rate, token, and cost limits</span></li>
+</ul>`,
+      },
+      {
+        name: "GraphRAG retrieval and observability",
+        description: "Neo4j knowledge-graph traversal plus vector search over pgvector and Chroma, fused with reciprocal-rank fusion. Offline RAGAS scores faithfulness and context-precision; self-hosted Langfuse traces latency, token cost, and retrieval hits. Dockerized for GCP Cloud Run at roughly zero cost at portfolio scale.",
+      },
+    ],
+    techStack: {
+      core: ["Python", "FastAPI", "Neo4j", "pgvector", "Chroma"],
+      infra: ["Docker", "GCP Cloud Run", "Ollama", "Llama Guard"],
+      tools: ["RAGAS (offline eval)", "Langfuse (tracing)", "Reciprocal Rank Fusion"],
+    },
+    highlights: [
+      "GraphRAG retrieval: Neo4j knowledge-graph traversal plus vector search (pgvector and Chroma), fused with reciprocal-rank fusion.",
+      "Four-layer LLM firewall: input intent-gate, retrieved-chunk sanitizer (an indirect prompt-injection defense), output guard, and per-IP rate plus token and cost caps.",
+      "Measured 100 percent injection-block rate on a 20-prompt adversarial set, with zero false positives on benign questions.",
+      "Offline RAGAS evaluation (faithfulness and context-precision) and self-hosted Langfuse tracing of latency, token cost, and retrieval hits.",
+      "Dockerized for GCP Cloud Run at roughly zero cost at portfolio scale, with 45 passing tests.",
+    ],
+  },
+  {
+    year: "2026",
+    title: "KiranaIQ",
+    slug: "kiranaiq",
+    category: "Demand-forecasting + inventory copilot",
+    status: "Built",
+    tagline: "A demand-forecasting and inventory copilot for kirana stores: snap a bill, get per-SKU LightGBM forecasts, SHAP explanations, reorder quantities, and price experiments, over a Telegram bot.",
+    summary:
+      "A demand-forecasting and inventory copilot for small Indian kirana stores: snap a bill, get per-SKU forecasts, plain-language explanations, reorder quantities, and price experiments.",
+    details:
+      "KiranaIQ bundles five capabilities small retailers have no analytics for today: reading a paper bill, forecasting demand per item, explaining the forecast, recommending what and how much to reorder, and testing price changes safely. It is the flagship for classical and forecasting ML, explainability, and applied product engineering.",
+    proof: "Measured WAPE 35.8% vs 62.1% seasonal-naive on synthetic retail data, 64 tests passing.",
+    why: "Small kirana stores run on memory and gut feel, with no analytics layer between a paper bill and a reorder decision. I wanted to see how far disciplined classical ML could go on that problem honestly: forecast demand per SKU, explain every number in language a shopkeeper would trust, and prove it against real baselines on synthetic data before ever claiming it works in a real shop.",
+    skills: ["LightGBM", "SHAP", "Forecasting", "A/B testing", "OCR", "Recommender systems", "FastAPI", "Telegram Bot API"],
+    href: "https://github.com/shreyash-Pandey-Katni/KiranaIQ",
+    ctaLabel: "View on GitHub",
+    statusNote: "Primary interface is a Telegram bot (built, token-gated, 17 handler tests). As of June 2026, Telegram is blocked in India under a Government of India order, so the live bot is not reachable from India without a VPN; it is deployable to a cloud host, with a webhook/alternative channel as the fallback.",
+    stats: [
+      { value: "35.8%", label: "Forecast WAPE (vs 62.1% naive, synthetic data)" },
+      { value: "64", label: "Tests passing" },
+      { value: "5-in-1", label: "Forecast, SHAP, OCR, recsys, A/B" },
+    ],
+    architecture: [
+      {
+        name: "Five capabilities in one copilot",
+        html: `<ul class="bullet-list">
+  <li><span><strong>OCR ingestion</strong> · reads a photo of a bill or GST invoice into SKU-level line items with reconciliation checks</span></li>
+  <li><span><strong>Forecasting</strong> · global LightGBM (Tweedie) per-SKU demand vs seasonal-naive and AutoETS</span></li>
+  <li><span><strong>Explainability</strong> · SHAP turns each forecast into plain language (festivals, paydays, day-of-week)</span></li>
+  <li><span><strong>Reorder + cross-sell</strong> · newsvendor quantities and market-basket recommendations</span></li>
+  <li><span><strong>Experiments</strong> · A/B harness with Bayesian and sequential tests</span></li>
+</ul>`,
+      },
+    ],
+    techStack: {
+      core: ["Python", "LightGBM (Tweedie)", "StatsForecast (AutoETS)", "pandas"],
+      infra: ["FastAPI", "python-telegram-bot"],
+      tools: ["SHAP (explainability)", "OCR (bill/invoice ingestion)", "Newsvendor + market-basket", "A/B harness (Bayesian + sequential)"],
+    },
+    highlights: [
+      "Per-SKU demand forecasting with a global LightGBM model (Tweedie) against seasonal-naive and AutoETS baselines: measured WAPE 35.8 percent versus 62.1 percent for seasonal-naive on synthetic retail data.",
+      "SHAP turns every forecast into plain language a shopkeeper understands (festivals, paydays, day-of-week effects).",
+      "OCR ingestion reads a photo of a bill or GST invoice into structured SKU-level line items, with reconciliation checks.",
+      "Newsvendor reorder quantities plus market-basket cross-sell, and an A/B harness (Bayesian and sequential tests) for price and promo experiments.",
+      "Telegram-bot interface (built, token-gated, 17 handler tests); 64 tests passing overall.",
+    ],
+  },
+  {
+    year: "2026",
+    title: "hybrid-search-bench",
+    slug: "hybrid-search-bench",
+    category: "Learning-to-rank retrieval benchmark",
+    status: "Built",
+    tagline: "BM25, SPLADE, and dense retrieval fused and reranked by a LambdaMART learning-to-rank model, measured honestly on a public BEIR dataset.",
+    summary:
+      "An honest hybrid-retrieval benchmark: BM25, SPLADE, and dense retrieval, fused and then reranked by a LambdaMART learning-to-rank model, measured on a public BEIR dataset.",
+    details:
+      "Three retrieval legs are evaluated on the same qrels, fused with reciprocal-rank fusion, and then reordered by a learning-to-rank reranker trained on the train split. It is the flagship for search, ranking, and the classical learning-to-rank skills that pure-LLM portfolios usually miss.",
+    proof: "BEIR SciFact nDCG@10 0.778 vs 0.728 RRF (+6.9%); BM25 0.686 matches the published figure.",
+    why: "Most retrieval portfolios stop at 'I called an embedding model.' I wanted the honest version of a search stack: three different retrievers measured on the same public qrels, a genuine learning-to-rank reranker on top, and every number anchored against published BEIR figures so the gains are credible rather than cherry-picked.",
+    skills: ["Learning-to-rank", "LambdaMART", "BM25", "SPLADE", "Dense retrieval", "FAISS", "BEIR", "Information retrieval"],
+    href: "https://github.com/shreyash-Pandey-Katni/hybrid-search-bench",
+    ctaLabel: "View on GitHub",
+    stats: [
+      { value: "0.778", label: "nDCG@10 (LambdaMART)" },
+      { value: "+6.9%", label: "Lift over RRF fusion" },
+      { value: "4", label: "Retrieval methods compared" },
+    ],
+    architecture: [
+      {
+        name: "Three retrieval legs, one reranker",
+        html: `<ul class="bullet-list">
+  <li><span><strong>BM25</strong> · lexical baseline via bm25s</span></li>
+  <li><span><strong>SPLADE</strong> · learned-sparse retrieval</span></li>
+  <li><span><strong>Dense</strong> · bi-encoder over FAISS</span></li>
+  <li><span><strong>Fusion + rerank</strong> · reciprocal-rank fusion, then a LightGBM LambdaMART reranker over per-leg scores, ranks, and agreement features</span></li>
+</ul>`,
+      },
+    ],
+    techStack: {
+      core: ["Python", "bm25s (BM25)", "SPLADE (learned sparse)", "FAISS (dense)"],
+      infra: ["LightGBM (LambdaMART)", "ranx (fusion + eval)"],
+      tools: ["BEIR / ir_datasets", "Reciprocal Rank Fusion"],
+    },
+    highlights: [
+      "Three legs on the same BEIR qrels: BM25 (bm25s), SPLADE learned-sparse (sentence-transformers), and a dense bi-encoder over FAISS.",
+      "Reciprocal-rank-fusion baseline, then a LightGBM LambdaMART reranker over the fused candidates (per-leg scores, ranks, and agreement features).",
+      "BEIR SciFact: LambdaMART nDCG@10 0.778 versus 0.728 for RRF fusion, a 6.9 percent lift; MRR 0.761, a 9.1 percent lift.",
+      "BM25 at nDCG@10 0.686 matches the published BEIR figure, anchoring the pipeline as correct rather than flattering.",
+    ],
+    benchmarks: [
+      { name: "nDCG@10 (LambdaMART)", value: "0.778", note: "vs 0.728 RRF, +6.9%" },
+      { name: "MRR (LambdaMART)", value: "0.761", note: "+9.1% over RRF" },
+      { name: "BM25 nDCG@10", value: "0.686", note: "matches published BEIR" },
+    ],
+  },
 ];
 
 export const archiveProjects = [
@@ -1216,6 +1462,16 @@ export const archiveProjects = [
   },
 ];
 
+export const roadmapProjects = [
+  {
+    status: "Planned",
+    title: "KiranaIQ forecasting v2",
+    summary:
+      "Improve KiranaIQ forecasting accuracy with intermittent-demand handling and a single global model across stores.",
+    href: "https://github.com/shreyash-Pandey-Katni/KiranaIQ",
+  },
+];
+
 export const skillGroups = [
   {
     title: "Languages",
@@ -1233,6 +1489,16 @@ export const skillGroups = [
       "LangChain",
       "Hugging Face",
       "FAISS",
+      "LightGBM",
+      "SHAP",
+      "Learning-to-rank",
+      "RAGAS",
+      "Langfuse",
+      "A/B testing",
+      "OCR",
+      "GraphRAG",
+      "Qdrant",
+      "LiteLLM",
     ],
   },
   {
@@ -1260,6 +1526,12 @@ export const skillGroups = [
       "MongoDB",
       "Cassandra",
       "Redis",
+      "pgvector",
+      "PostgreSQL",
+      "Neo4j",
+      "Kubernetes",
+      "OpenTelemetry",
+      "Prometheus",
     ],
   },
 ];
@@ -1364,6 +1636,8 @@ export const projectsContent = {
     "The portfolio is now anchored around AI-heavy, backend-heavy projects that better reflect the direction I am taking professionally: model building, agent orchestration, secure autonomy, and workflow engineering.",
   archiveIntro:
     "Before the current generation of work, I used smaller ML and web projects to build the habits that still matter now: experimentation, debugging, and shipping complete systems.",
+  roadmapIntro:
+    "What I am planning next, ahead of building it in the open.",
 };
 
 export const workContent = {

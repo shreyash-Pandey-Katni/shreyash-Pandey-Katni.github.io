@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectsView from '../../components/views/ProjectsView.astro';
+import { getContent } from '../../i18n/index.js';
+
+const locale = 'kn';
+const { title, description } = getContent(locale).pageMeta['/projects'];
+---
+
+<BaseLayout title={title} description={description}>
+  <ProjectsView locale={locale} />
+</BaseLayout>

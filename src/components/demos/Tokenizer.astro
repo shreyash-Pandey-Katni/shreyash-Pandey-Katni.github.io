@@ -1,0 +1,240 @@
+---
+// Tokenizer Playground — Phoenix 32K (en) vs Sweta 64K (multilingual).
+// Real path: loads the actual tokenizer.json from HuggingFace via Transformers.js
+// and runs genuine BPE encoding client-side. If the model can't be fetched
+// (offline / private), it falls back to a heuristic approximation and says so.
+const { id = "tok" } = Astro.props;
+---
+
+<div class="demo-tokenizer" data-root={id}>
+  <div class="tk-controls">
+    <div class="tk-modes" role="tablist">
+      <button class="tk-mode is-active" data-mode="phoenix">Phoenix · 32K (en)</button>
+      <button class="tk-mode" data-mode="sweta">Sweta · 64K (multi)</button>
+    </div>
+    <div class="tk-meta">
+      <span class="tk-engine" data-state="idle">·</span>
+      <span class="tk-count"><span class="tk-n">0</span> tokens</span>
+    </div>
+  </div>
+
+  <textarea class="tk-input" spellcheck="false" rows="3">The transformer learns नमस्ते and ಕನ್ನಡ from scratch.</textarea>
+
+  <div class="tk-samples">
+    <span>try:</span>
+    <button data-sample="Attention is all you need.">english</button>
+    <button data-sample="नमस्ते दुनिया, यह एक भाषा मॉडल है।">हिन्दी</button>
+    <button data-sample="ಕನ್ನಡ ಭಾಷೆಯ ಮಾದರಿ ತರಬೇತಿ.">ಕನ್ನಡ</button>
+  </div>
+
+  <div class="tk-output" aria-live="polite"></div>
+  <p class="tk-note"></p>
+</div>
+
+<style is:global>
+  .demo-tokenizer {
+    font-family: var(--demo-mono, "JetBrains Mono", ui-monospace, monospace);
+    color: var(--demo-fg, #18181b);
+  }
+  .tk-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .tk-modes { display: inline-flex; gap: 4px; padding: 4px;
+    border: 1px solid var(--demo-border, #e4e4e7); border-radius: 10px;
+    background: var(--demo-surface, #fff); }
+  .tk-mode {
+    font: inherit; font-size: 12px; cursor: pointer; border: 0;
+    background: transparent; color: var(--demo-muted, #71717a);
+    padding: 6px 12px; border-radius: 7px; transition: .15s;
+  }
+  .tk-mode.is-active { background: var(--demo-accent, #6d28d9); color: #fff; }
+  .tk-meta { display: inline-flex; align-items: center; gap: 12px; }
+  .tk-engine { font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--demo-border, #e4e4e7);
+    color: var(--demo-muted, #71717a); white-space: nowrap; }
+  .tk-engine[data-state="real"] { color: #16a34a; border-color: color-mix(in srgb, #16a34a 40%, transparent); }
+  .tk-engine[data-state="real"]::before { content: "● "; }
+  .tk-engine[data-state="loading"] { color: var(--demo-accent, #6d28d9); border-color: color-mix(in srgb, var(--demo-accent, #6d28d9) 40%, transparent); }
+  .tk-engine[data-state="approx"] { color: #d97706; border-color: color-mix(in srgb, #d97706 40%, transparent); }
+  .tk-count { font-size: 13px; color: var(--demo-muted, #71717a); }
+  .tk-count .tk-n { color: var(--demo-accent, #6d28d9); font-weight: 700; font-size: 18px; }
+  .tk-input {
+    width: 100%; box-sizing: border-box; resize: vertical;
+    font: inherit; font-size: 15px; line-height: 1.6;
+    padding: 14px; border-radius: 12px;
+    border: 1px solid var(--demo-border, #e4e4e7);
+    background: var(--demo-surface, #fff); color: var(--demo-fg, #18181b);
+    outline: none;
+  }
+  .tk-input:focus { border-color: var(--demo-accent, #6d28d9); }
+  .tk-samples { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin: 10px 0; font-size: 12px; color: var(--demo-muted, #71717a); }
+  .tk-samples button {
+    font: inherit; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--demo-border, #e4e4e7); background: transparent;
+    color: var(--demo-fg, #18181b); padding: 3px 10px; border-radius: 999px;
+  }
+  .tk-samples button:hover { border-color: var(--demo-accent, #6d28d9); }
+  .tk-output {
+    margin-top: 4px; padding: 14px; border-radius: 12px; min-height: 56px;
+    background: var(--demo-surface-2, #fafafa);
+    border: 1px solid var(--demo-border, #e4e4e7);
+    display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start;
+  }
+  .tk-tok {
+    font-size: 14px; padding: 3px 6px; border-radius: 6px; white-space: pre;
+    line-height: 1.2; border: 1px solid transparent;
+  }
+  .tk-tok--space { opacity: .5; }
+  .tk-note { font-size: 12px; color: var(--demo-muted, #71717a); margin-top: 10px; min-height: 16px; }
+</style>
+
+<script>
+  const HUES = [262, 199, 152, 33, 350, 280, 95, 222];
+  const REPOS = {
+    phoenix: "shreyash-pandey-katni/phoenix-125m",
+    sweta: "shreyash-pandey-katni/sweta-125m-multilingual",
+  };
+
+  /* ── Transformers.js loader (lazy, from CDN) ───────────────── */
+  let libPromise = null;
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = import("https://esm.sh/@huggingface/transformers@3")
+        .then((mod) => { mod.env.allowLocalModels = false; return mod; });
+    }
+    return libPromise;
+  }
+  const tokenizerCache = {}; // mode -> tokenizer | "approx"
+
+  /* ── Heuristic fallback (used only if the real tokenizer fails) ── */
+  const SUB = (
+    "the of and to in is it that as for was with are be this have from at " +
+    "transform transformer attention learn learning model token tokenizer " +
+    "scratch language need ing tion ed er est ly ness ment able ous ive al un pre over"
+  ).split(" ").filter(Boolean);
+  const SUBSET = new Set(SUB);
+  const isIndic = (ch) => {
+    const c = ch.codePointAt(0);
+    return (c >= 0x0900 && c <= 0x097f) || (c >= 0x0c80 && c <= 0x0cff);
+  };
+  function approxItems(text, mode) {
+    const items = [];
+    for (const chunk of text.match(/\s+|[^\s]+/g) || []) {
+      if (/^\s+$/.test(chunk)) { items.push({ text: chunk, space: true }); continue; }
+      let buf = "", ind = null;
+      const flush = () => {
+        if (!buf) return;
+        if (ind) {
+          if (mode === "phoenix") for (const c of buf) items.push({ text: c, indic: true });
+          else for (const c of buf.match(/[\s\S]{1,2}/g) || []) items.push({ text: c, indic: true });
+        } else {
+          let i = 0;
+          while (i < buf.length) {
+            let m = null;
+            for (let len = Math.min(7, buf.length - i); len >= 2; len--)
+              if (SUBSET.has(buf.slice(i, i + len).toLowerCase())) { m = buf.slice(i, i + len); break; }
+            if (m) { items.push({ text: m }); i += m.length; } else { items.push({ text: buf[i] }); i++; }
+          }
+        }
+        buf = "";
+      };
+      for (const ch of chunk) { const t = isIndic(ch); if (ind === null) ind = t; if (t !== ind) { flush(); ind = t; } buf += ch; }
+      flush();
+    }
+    return { items, indic: items.some((x) => x.indic) };
+  }
+
+  /* ── Real tokenization via the loaded tokenizer ────────────── */
+  function realItems(text, tk) {
+    const ids = tk.encode(text, { add_special_tokens: false });
+    const items = ids.map((id) => {
+      const piece = tk.decode([id]); // byte-level pieces; partials show fragmentation honestly
+      return /^\s+$/.test(piece) || piece === "" ? { text: piece || "▁", space: true } : { text: piece };
+    });
+    return { items, count: ids.length };
+  }
+
+  function setEngine(root, state, label) {
+    const el = root.querySelector(".tk-engine");
+    el.dataset.state = state;
+    el.textContent = label;
+  }
+
+  async function getTokenizer(mode, root) {
+    if (tokenizerCache[mode]) return tokenizerCache[mode];
+    try {
+      setEngine(root, "loading", "loading real vocab…");
+      const lib = await loadLib();
+      const tk = await lib.AutoTokenizer.from_pretrained(REPOS[mode]);
+      tokenizerCache[mode] = tk;
+      return tk;
+    } catch (e) {
+      tokenizerCache[mode] = "approx";
+      return "approx";
+    }
+  }
+
+  function paint(root, items, count, real, mode, indic) {
+    const out = root.querySelector(".tk-output");
+    out.innerHTML = "";
+    let h = 0;
+    for (const it of items) {
+      const span = document.createElement("span");
+      span.className = "tk-tok" + (it.space ? " tk-tok--space" : "");
+      span.textContent = it.space ? (it.text === "▁" ? "▁" : "·".repeat(it.text.length)) : it.text;
+      if (!it.space) {
+        const hue = HUES[h++ % HUES.length];
+        span.style.background = `hsl(${hue} 85% 92%)`;
+        span.style.color = `hsl(${hue} 70% 28%)`;
+        span.style.borderColor = `hsl(${hue} 70% 80%)`;
+      }
+      out.appendChild(span);
+    }
+    root.querySelector(".tk-n").textContent = count;
+    const note = root.querySelector(".tk-note");
+    if (real) {
+      note.textContent = indic && mode === "phoenix"
+        ? "Real Phoenix 32K BPE. Its English-trained vocab has no Indic merges, so these scripts shatter into many tokens — exactly why Sweta needed a 64K joint vocab."
+        : indic
+        ? "Real Sweta 64K joint BPE, encoding Indic scripts into far fewer tokens than an English-only vocab would."
+        : `Real ${mode === "phoenix" ? "Phoenix 32K" : "Sweta 64K"} BPE running in your browser via Transformers.js.`;
+    } else {
+      note.textContent = "Could not fetch the real vocab, so this is a heuristic approximation of BPE. Token boundaries are illustrative, not exact.";
+    }
+  }
+
+  async function update(root, mode) {
+    const text = root.querySelector(".tk-input").value;
+    const tk = await getTokenizer(mode, root);
+    // guard: mode may have changed while awaiting
+    if (root.dataset.mode !== mode) return;
+    if (tk === "approx") {
+      const { items, indic } = approxItems(text, mode);
+      setEngine(root, "approx", "approx");
+      paint(root, items, items.filter((i) => !i.space).length, false, mode, indic);
+    } else {
+      const { items, count } = realItems(text, tk);
+      setEngine(root, "real", mode === "phoenix" ? "real · 32K" : "real · 64K");
+      paint(root, items, count, true, mode, /[ऀ-ॿಀ-೿]/.test(text));
+    }
+  }
+
+  document.querySelectorAll(".demo-tokenizer").forEach((root) => {
+    root.dataset.mode = "phoenix";
+    const run = () => update(root, root.dataset.mode);
+    root.querySelectorAll(".tk-mode").forEach((b) =>
+      b.addEventListener("click", () => {
+        root.dataset.mode = b.dataset.mode;
+        root.querySelectorAll(".tk-mode").forEach((x) => x.classList.toggle("is-active", x === b));
+        run();
+      })
+    );
+    let t;
+    root.querySelector(".tk-input").addEventListener("input", () => { clearTimeout(t); t = setTimeout(run, 150); });
+    root.querySelectorAll(".tk-samples button").forEach((b) =>
+      b.addEventListener("click", () => { root.querySelector(".tk-input").value = b.dataset.sample; run(); })
+    );
+    run();
+  });
+</script>

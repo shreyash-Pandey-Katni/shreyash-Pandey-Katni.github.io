@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import DemoHost from '../components/demos/DemoHost.astro';
+import Tokenizer from '../components/demos/Tokenizer.astro';
+import SemanticSearch from '../components/demos/SemanticSearch.astro';
+// import AutoHeal from '../components/demos/AutoHeal.astro'; // hidden for now
+import BeatPhoenix from '../components/demos/BeatPhoenix.astro';
+
+const demos = [
+  {
+    key: 'tokenizer',
+    eyebrow: 'Phoenix 125M · Sweta multilingual',
+    title: 'Tokenizer Playground',
+    tag: 'real model',
+    body: 'Type anything and watch it split into BPE tokens. Toggle the 32K English vocab against the 64K multilingual one and see Hindi and Kannada stop fragmenting. Loads my real Phoenix and Sweta tokenizers from HuggingFace and runs them in your browser.',
+    home: 'Lives best on the Phoenix / Sweta project pages.',
+    Comp: Tokenizer,
+  },
+  {
+    key: 'search',
+    eyebrow: 'Retrieval · neural embeddings, in-browser',
+    title: 'Semantic Search',
+    tag: 'real model',
+    body: 'Search my projects by meaning, not keywords. Runs the bge-small-en-v1.5 embedding model and the cosine ranking entirely on your device, no server.',
+    home: 'Lives best on the Projects index as a way to filter the portfolio.',
+    Comp: SemanticSearch,
+  },
+  {
+    key: 'beatphoenix',
+    eyebrow: 'Evaluation · WinoGrande-style',
+    title: 'Beat Phoenix 125M',
+    tag: 'real model',
+    body: 'Pick the better sentence ending, then see what Phoenix actually predicted. The 125M model itself runs in your browser (ONNX, int8) and scores each option by log-likelihood. It sits around 0.507 versus a 0.50 coin flip, and that honesty is the point.',
+    home: 'Lives best on the Phoenix project page next to the benchmark table.',
+    Comp: BeatPhoenix,
+  },
+  // Hidden for now — IBM SAT Auto-Healing Locators demo:
+  // {
+  //   key: 'autoheal',
+  //   eyebrow: 'IBM SAT · three-tier recovery',
+  //   title: 'Auto-Healing Locators',
+  //   tag: 'explainer',
+  //   body: 'Break the test selector, then watch the recovery ladder climb from CSS match to text embedding to a vision-language model until the button is found again. This one is an interactive explainer of the shipped IBM system, not a live model.',
+  //   home: 'Lives best on the IBM work entry as proof of the headline result.',
+  //   Comp: AutoHeal,
+  // },
+];
+---
+
+<BaseLayout
+  title="Playground · Shreyash Pandey"
+  description="Three interactive demos from my AI systems work, running entirely in your browser: a tokenizer, semantic search, and a commonsense game versus Phoenix 125M."
+>
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 14px;">Playground</p>
+      <h1 class="t-display">Play with the work, do not just read it</h1>
+      <p class="t-body--lg" style="max-width: 660px; margin-top: 16px;">
+        Three pieces pulled straight from my projects. Every one runs client-side, no backend.
+        Each note says where it would slot into the rest of the site.
+      </p>
+    </Reveal>
+  </section>
+
+  {demos.map((d) => {
+    const Comp = d.Comp;
+    return (
+      <section class="page__section">
+        <Reveal class="lab-panel">
+          <p class="t-eyebrow card__eyebrow">{d.eyebrow}</p>
+          <h2 class="t-heading lab-panel__title">
+            {d.title}
+            <span class={`lab-tag lab-tag--${d.tag === 'real model' ? 'real' : 'sim'}`}>{d.tag}</span>
+          </h2>
+          <p class="t-body lab-panel__body">{d.body}</p>
+          <DemoHost>
+            <Comp />
+          </DemoHost>
+          <p class="lab-panel__home"><span>↳ placement</span> {d.home}</p>
+        </Reveal>
+      </section>
+    );
+  })}
+
+  <section class="page__section">
+    <Reveal class="card card--dark span-4" style="text-align:center; padding: 44px 32px;">
+      <p class="t-eyebrow card__eyebrow">Same engine, real pages</p>
+      <h2 class="t-heading card__title" style="color:#fff;">These drop into the existing design as-is</h2>
+      <p class="t-body card__body" style="max-width: 540px; margin: 0 auto; color: rgba(255,255,255,0.7);">
+        They already read the site palette and flip with dark mode. Next step is wiring each one into its home page above.
+      </p>
+    </Reveal>
+  </section>
+</BaseLayout>
+
+<style>
+  .lab-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--card-pad);
+    box-shadow: var(--shadow-card);
+  }
+  .lab-panel__title { margin-bottom: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .lab-tag { font-family: var(--font-mono); font-size: 11px; font-weight: 600; padding: 4px 10px;
+    border-radius: 999px; letter-spacing: 0; }
+  .lab-tag--real { color: #047857; background: var(--bg-emerald-soft); }
+  .lab-tag--real::before { content: "● "; }
+  .lab-tag--sim { color: #b45309; background: rgba(217, 119, 6, 0.12); }
+  .lab-panel__body { max-width: 640px; margin-bottom: 24px; }
+  .lab-panel__home {
+    margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--text-secondary); font-family: var(--font-mono);
+  }
+  .lab-panel__home span { color: var(--bg-accent); margin-right: 8px; }
+</style>

@@ -1288,6 +1288,21 @@ button { font: inherit; cursor: pointer; border: none; background: none; }
   .card--stat {
     min-height: 100px;
   }
+
+  /* let long pill text wrap instead of overflowing its card */
+  .chip {
+    white-space: normal;
+  }
+
+  /* keep wide media (tables, code, pre) inside the viewport */
+  .card {
+    overflow-x: hidden;
+  }
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
 }
 
 /* Desktop (>901px): show desktop nav, hide toggle */

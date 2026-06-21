@@ -18,6 +18,8 @@ const {
 const canonicalURL = new URL(Astro.url.pathname, 'https://shreyash.co.in').href;
 const ogImageURL = new URL(ogImage, 'https://shreyash.co.in').href;
 
+const locale = Astro.currentLocale || 'en';
+
 const isHome    = Astro.url.pathname === '/';
 const isAbout   = Astro.url.pathname === '/about';
 
@@ -58,7 +60,7 @@ const webPageSchema = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

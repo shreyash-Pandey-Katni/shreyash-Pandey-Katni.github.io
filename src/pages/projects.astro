@@ -6,6 +6,7 @@ import {
   projectsContent,
   flagshipProjects,
   archiveProjects,
+  roadmapProjects,
   siteMeta,
   pageMeta,
 } from '../data/siteContent';
@@ -60,9 +61,9 @@ const { title, description } = pageMeta['/projects'];
   <section class="page__section">
     <div class="bento reveal-stagger">
       {flagshipProjects.map((proj, i) => {
-        const isDark = i === 0 || i === 3;
-        // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2.
-        const isWide = i === 0 || i === 1 || i === 4 || i === 7;
+        const isDark = i === 0 || i === 3 || i === 10;
+        // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2 / 1+1+2 / 2+2.
+        const isWide = i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12;
         const spanClass = isWide ? 'span-2' : '';
         const isModelCard = proj.ctaLabel === 'View model card';
         const ctaVariant = isDark ? 'ghost' : isModelCard ? 'accent' : 'ghost';
@@ -144,6 +145,59 @@ const { title, description } = pageMeta['/projects'];
             {proj.title}
           </h3>
           <p class="t-small">{proj.summary}</p>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== ROADMAP / IN PROGRESS ===== */}
+  <section class="page__section">
+    <Reveal>
+      <p class="t-eyebrow" style="margin-bottom: 8px;">On the roadmap</p>
+      <p class="t-body" style="margin-bottom: 20px; max-width: 600px;">
+        {projectsContent.roadmapIntro}
+      </p>
+    </Reveal>
+    <div class="bento reveal-stagger">
+      {roadmapProjects.map((proj) => (
+        <Reveal class="card card--compact card--ghost" style={proj.wide ? 'grid-column: 1 / -1;' : undefined}>
+          <p class="t-eyebrow card__eyebrow">{proj.status}</p>
+          <h3 class="t-subheading card__title" style="font-size: 1rem;">
+            {proj.title}
+          </h3>
+          <p class="t-small" style="margin-bottom: 12px;">{proj.summary}</p>
+          {proj.details && (
+            <p class="t-small" style="margin-bottom: 12px; opacity: 0.85;">{proj.details}</p>
+          )}
+          {proj.stats && (
+            <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 14px;">
+              {proj.stats.map((s) => (
+                <div>
+                  <div class="t-subheading" style="font-size: 1.05rem;">{s.value}</div>
+                  <div class="t-small" style="opacity: 0.65;">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {proj.highlights && (
+            <ul class="t-small" style="margin: 0 0 14px; padding-left: 18px; display: grid; gap: 6px;">
+              {proj.highlights.map((h) => (
+                <li>{h}</li>
+              ))}
+            </ul>
+          )}
+          {proj.stack && (
+            <p class="t-small" style="margin-bottom: 12px; opacity: 0.65;">{proj.stack.join(' · ')}</p>
+          )}
+          {proj.href && (
+            <ActionLink
+              href={proj.href}
+              external={true}
+              label="View on GitHub →"
+              variant="ghost"
+              small={true}
+            />
+          )}
         </Reveal>
       ))}
     </div>

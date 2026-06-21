@@ -1,96 +1,63 @@
 ---
-import { navigationLinks, primaryContactHref } from '../data/siteContent';
+import { getContent, getUI, localizedPath, stripLocale, normalizeLocale, LOCALES } from '../i18n/index.js';
 
-const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const locale = normalizeLocale(Astro.currentLocale);
+const { navigationLinks, primaryContactHref } = getContent(locale);
+const t = getUI(locale);
+
+const barePath = (stripLocale(Astro.url.pathname).replace(/\/$/, '') || '/');
+const localizedRoutes = ['/', '/work', '/about', '/projects'];
+const switchBase = localizedRoutes.includes(barePath) ? barePath : '/';
+const currentLocale = LOCALES.find((l) => l.code === locale) || LOCALES[0];
+const isActive = (p) => barePath === p;
 ---
 
 <nav class="nav" role="navigation" aria-label="Main">
   <div class="nav__inner">
-    {/* Logo */}
-    <a href="/" class="nav__logo" aria-label="Home">
+    <a href={localizedPath(locale, '/')} class="nav__logo" aria-label="Home">
       <img src="/icon.svg" alt="Shreyash Pandey" class="nav__avatar" />
     </a>
 
     {/* Desktop links */}
     <div class="nav__links">
-      {navigationLinks.map((link) => {
-        const isActive = currentPath === link.path || (link.path === '/' && currentPath === '/');
-        return (
-          <a
-            href={link.path}
-            class={`nav__link${isActive ? ' nav__link--active' : ''}`}
-          >
-            {link.label}
-          </a>
-        );
-      })}
+      {navigationLinks.map((link) => (
+        <a href={localizedPath(locale, link.path)} class={`nav__link${isActive(link.path) ? ' nav__link--active' : ''}`}>
+          {link.label}
+        </a>
+      ))}
+      <a href="/lab" class="nav__link nav__link--playground">{t.nav_playground}</a>
     </div>
 
     <div class="nav__actions nav__actions--desktop">
-      {/* Theme toggle */}
+      {/* Language switcher */}
+      <details class="lang-switch">
+        <summary aria-label="Change language">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+          <span>{currentLocale.label}</span>
+        </summary>
+        <div class="lang-switch__menu">
+          {LOCALES.map((l) => (
+            <a href={localizedPath(l.code, switchBase)} class={l.code === locale ? 'is-active' : ''} hreflang={l.code}>{l.name}</a>
+          ))}
+        </div>
+      </details>
+
       <button class="theme-toggle" type="button" aria-label="Toggle theme">
-        {/* Moon: shown in light mode */}
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        {/* Sun: shown in dark mode */}
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
 
-      {/* Desktop Resume */}
-      <a
-        href="/Shreyash_Pandey_Resume.pdf"
-        download
-        class="btn btn--secondary btn--sm"
-      >
-        Resume ↓
-      </a>
-
-      {/* Desktop CTA */}
-      <a
-        href={primaryContactHref}
-        class="nav__cta"
-        data-copy-email="shreyash.pandey.katni@gmail.com"
-        title="Click to copy email"
-      >
-        Get in touch
-      </a>
+      <a href="/Shreyash_Pandey_Resume.pdf" download class="btn btn--secondary btn--sm">{t.nav_resume} ↓</a>
+      <a href={primaryContactHref} class="nav__cta" data-copy-email="shreyash.pandey.katni@gmail.com" title="Click to copy email">{t.nav_cta}</a>
     </div>
 
     {/* Mobile: theme toggle + hamburger */}
     <div class="nav__mobile-actions">
       <button class="theme-toggle" type="button" aria-label="Toggle theme">
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
-      <button
-        class="nav__toggle"
-        onclick="this.classList.toggle('nav__toggle--open'); document.querySelector('.nav__overlay').classList.toggle('nav__overlay--open'); document.body.style.overflow = document.body.style.overflow ? '' : 'hidden';"
-        aria-expanded="false"
-        aria-label="Open menu"
-      >
+      <button class="nav__toggle" onclick="this.classList.toggle('nav__toggle--open'); document.querySelector('.nav__overlay').classList.toggle('nav__overlay--open'); document.body.style.overflow = document.body.style.overflow ? '' : 'hidden';" aria-expanded="false" aria-label="Open menu">
         <span class="nav__toggle-bar"></span>
       </button>
     </div>
@@ -99,48 +66,74 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 {/* Mobile overlay */}
 <div class="nav__overlay" aria-hidden="true">
-  {navigationLinks.map((link) => {
-    const isActive = currentPath === link.path || (link.path === '/' && currentPath === '/');
-    return (
-      <a
-        href={link.path}
-        class={`nav__overlay-link${isActive ? ' nav__overlay-link--active' : ''}`}
-        onclick="document.querySelector('.nav__toggle').classList.remove('nav__toggle--open'); document.querySelector('.nav__overlay').classList.remove('nav__overlay--open'); document.body.style.overflow = '';"
-      >
-        {link.label}
-      </a>
-    );
-  })}
+  {navigationLinks.map((link) => (
+    <a href={localizedPath(locale, link.path)} class={`nav__overlay-link${isActive(link.path) ? ' nav__overlay-link--active' : ''}`} onclick="document.querySelector('.nav__toggle').classList.remove('nav__toggle--open'); document.querySelector('.nav__overlay').classList.remove('nav__overlay--open'); document.body.style.overflow = '';">
+      {link.label}
+    </a>
+  ))}
+  <a href="/lab" class="nav__overlay-link" onclick="document.querySelector('.nav__toggle').classList.remove('nav__toggle--open'); document.querySelector('.nav__overlay').classList.remove('nav__overlay--open'); document.body.style.overflow = '';">{t.nav_playground}</a>
+
+  <div class="nav__overlay-langs">
+    {LOCALES.map((l) => (
+      <a href={localizedPath(l.code, switchBase)} class={`nav__lang${l.code === locale ? ' nav__lang--active' : ''}`} hreflang={l.code}>{l.name}</a>
+    ))}
+  </div>
+
   <div class="nav__overlay-cta">
-    <a
-      href="/Shreyash_Pandey_Resume.pdf"
-      download
-      class="btn btn--secondary"
-      style="width: 100%; justify-content: center;"
-    >
-      Resume ↓
-    </a>
-    <a
-      href={primaryContactHref}
-      class="btn btn--primary"
-      style="width: 100%; justify-content: center;"
-      data-copy-email="shreyash.pandey.katni@gmail.com"
-      title="Click to copy email"
-    >
-      Get in touch
-    </a>
+    <a href="/Shreyash_Pandey_Resume.pdf" download class="btn btn--secondary" style="width: 100%; justify-content: center;">{t.nav_resume} ↓</a>
+    <a href={primaryContactHref} class="btn btn--primary" style="width: 100%; justify-content: center;" data-copy-email="shreyash.pandey.katni@gmail.com" title="Click to copy email">{t.nav_cta}</a>
   </div>
 </div>
 
 <script is:inline>
-  /* Smooth scroll to top on nav click */
-  document.querySelectorAll('.nav__overlay-link').forEach(link => {
-    link.addEventListener('click', () => {
-      setTimeout(() => window.scrollTo(0, 0), 0);
+  document.querySelectorAll('.nav__overlay-link').forEach((link) => {
+    link.addEventListener('click', () => { setTimeout(() => window.scrollTo(0, 0), 0); });
+  });
+  /* close language dropdown on outside click */
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('details.lang-switch[open]').forEach((d) => {
+      if (!d.contains(e.target)) d.removeAttribute('open');
     });
   });
 </script>
 
-<style is:global>
-  /* Styles are in index.css */
+<style>
+  /* Playground nav link — a subtle accent pill */
+  .nav__link--playground {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px !important;
+    color: var(--bg-accent) !important;
+  }
+  .nav__link--playground:hover { border-color: var(--bg-accent); background: var(--bg-accent-soft); }
+
+  /* Language switcher (details/summary dropdown) */
+  .lang-switch { position: relative; }
+  .lang-switch summary {
+    list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
+    padding: 7px 11px; border: 1px solid var(--border); border-radius: 999px; user-select: none;
+  }
+  .lang-switch summary::-webkit-details-marker { display: none; }
+  .lang-switch summary:hover { color: var(--text-primary); border-color: var(--border-hover); }
+  .lang-switch[open] summary { color: var(--text-primary); border-color: var(--bg-accent); }
+  .lang-switch__menu {
+    position: absolute; right: 0; top: calc(100% + 8px); min-width: 140px; z-index: 60;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hover); padding: 6px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .lang-switch__menu a {
+    padding: 8px 12px; border-radius: var(--radius-xs); font-size: 14px; color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .lang-switch__menu a:hover { background: var(--bg-accent-soft); color: var(--text-primary); }
+  .lang-switch__menu a.is-active { color: var(--bg-accent); font-weight: 600; }
+
+  /* Mobile overlay language row */
+  .nav__overlay-langs { display: flex; gap: 8px; margin-top: 8px; }
+  .nav__lang {
+    flex: 1; text-align: center; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 14px; color: var(--text-secondary); text-decoration: none;
+  }
+  .nav__lang--active { color: var(--bg-accent); border-color: var(--bg-accent); background: var(--bg-accent-soft); }
 </style>
