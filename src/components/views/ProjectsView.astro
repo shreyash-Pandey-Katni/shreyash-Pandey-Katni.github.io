@@ -1,0 +1,229 @@
+---
+import Reveal from '../Reveal.astro';
+import ActionLink from '../ActionLink.astro';
+import { getContent, getUI, normalizeLocale } from '../../i18n/index.js';
+
+const locale = normalizeLocale(Astro.props.locale);
+const c = getContent(locale);
+const t = getUI(locale);
+const { flagshipProjects, archiveProjects, siteMeta, projectsContent, roadmapProjects } = c;
+
+/* Highlight known keywords with monospace styling */
+const KW_PATTERNS = [
+  'LLaMA-style', 'RTX 3080 Ti', 'IBM Granite', 'Claude', 'Ollama',
+  'Playwright', 'Telegram', 'FAISS', 'PyTorch', 'LangChain',
+  'CycleGAN', 'GAN', 'MERN', 'Spring Boot', 'Flask',
+  'WinoGrande', 'HellaSwag', 'ARC-E', 'Apache 2.0',
+  'SQLite', 'Netlify', 'WhatsApp',
+];
+
+function highlightKeywords(text) {
+  if (!text) return text;
+  const escaped = KW_PATTERNS.map((k) =>
+    k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  );
+  const regex = new RegExp(`(${escaped.join('|')})`, 'g');
+  const parts = text.split(regex);
+  return parts.map((part) =>
+    KW_PATTERNS.includes(part)
+      ? `<span class="kw">${part}</span>`
+      : part
+  ).join('');
+}
+---
+
+{/* ===== TITLE ROW ===== */}
+<section class="page__section">
+  <div class="bento reveal-stagger">
+    <Reveal class="card span-3">
+      <p class="t-eyebrow card__eyebrow">{projectsContent.eyebrow}</p>
+      <h1 class="t-display card__title">{projectsContent.title}</h1>
+      <p class="t-body--lg" style="max-width: 640px;">
+        {projectsContent.intro}
+      </p>
+    </Reveal>
+    <Reveal class="card card--accent span-1" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+      <span class="stat-value" style="color: #fff;">2026</span>
+      <span class="stat-label" style="color: rgba(255,255,255,0.7); text-align: center;">
+        {t.projects_flagship_builds}
+      </span>
+    </Reveal>
+  </div>
+</section>
+
+{/* ===== FLAGSHIP PROJECTS ===== */}
+<section class="page__section">
+  <div class="bento reveal-stagger">
+    {flagshipProjects.map((proj, i) => {
+      const isDark = i === 0 || i === 3 || i === 10;
+      // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2 / 1+1+2 / 2+2.
+      const isWide = i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12;
+      const spanClass = isWide ? 'span-2' : '';
+      const isModelCard = proj.ctaLabel === 'View model card';
+      const ctaVariant = isDark ? 'ghost' : isModelCard ? 'accent' : 'ghost';
+      const ctaClass = isDark ? 'btn--on-dark' : '';
+
+      return (
+        <Reveal
+          class={`card ${spanClass}${isDark ? ' card--dark' : ''} card--interactive`}
+        >
+          <p class="t-eyebrow card__eyebrow">
+            {proj.year} · {proj.category}
+          </p>
+          <h2 class="t-subheading card__title">{proj.title}</h2>
+          <p class="t-body card__body">
+            {/* Use Fragment to preserve HTML from highlighting */}
+            <Fragment set:html={highlightKeywords(proj.summary)} />
+          </p>
+          <p class="t-small card__body">
+            <Fragment set:html={highlightKeywords(proj.details)} />
+          </p>
+
+          {/* Proof line */}
+          <p class="t-small" style={{
+            fontFamily: 'var(--font-mono)',
+            marginBottom: '16px',
+            color: isDark ? 'rgba(255,255,255,0.5)' : 'var(--text-tertiary)'
+          }}>
+            ✓ {proj.proof}
+          </p>
+
+          {/* Skills */}
+          <div class="chip-grid" style="margin-bottom: 16px;">
+            {proj.skills.map((s) => (
+              <span class={`chip${isDark ? ' chip--dark' : ' chip--outline'}`}>
+                {s}
+              </span>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div class="card__footer" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <ActionLink
+              href={`/projects/${proj.slug}`}
+              label={t.projects_view_details_arrow}
+              variant={ctaVariant}
+              small={true}
+              class={ctaClass}
+            />
+            {proj.href && (
+              <ActionLink
+                href={proj.href}
+                external={true}
+                label={proj.ctaLabel || t.proj_view_project}
+                variant="ghost"
+                small={true}
+                class={ctaClass}
+              />
+            )}
+          </div>
+        </Reveal>
+      );
+    })}
+  </div>
+</section>
+
+{/* ===== ARCHIVE ===== */}
+<section class="page__section">
+  <Reveal>
+    <p class="t-eyebrow" style="margin-bottom: 8px;">{t.projects_earlier_work}</p>
+    <p class="t-body" style="margin-bottom: 20px; max-width: 600px;">
+      {projectsContent.archiveIntro}
+    </p>
+  </Reveal>
+  <div class="bento reveal-stagger">
+    {archiveProjects.map((proj) => (
+      <Reveal class="card card--compact card--ghost">
+        <p class="t-eyebrow card__eyebrow">{proj.period}</p>
+        <h3 class="t-subheading card__title" style="font-size: 1rem;">
+          {proj.title}
+        </h3>
+        <p class="t-small">{proj.summary}</p>
+      </Reveal>
+    ))}
+  </div>
+</section>
+
+{/* ===== ROADMAP / IN PROGRESS ===== */}
+<section class="page__section">
+  <Reveal>
+    <p class="t-eyebrow" style="margin-bottom: 8px;">{t.projects_on_the_roadmap}</p>
+    <p class="t-body" style="margin-bottom: 20px; max-width: 600px;">
+      {projectsContent.roadmapIntro}
+    </p>
+  </Reveal>
+  <div class="bento reveal-stagger">
+    {roadmapProjects.map((proj) => (
+      <Reveal class="card card--compact card--ghost" style={proj.wide ? 'grid-column: 1 / -1;' : undefined}>
+        <p class="t-eyebrow card__eyebrow">{proj.status}</p>
+        <h3 class="t-subheading card__title" style="font-size: 1rem;">
+          {proj.title}
+        </h3>
+        <p class="t-small" style="margin-bottom: 12px;">{proj.summary}</p>
+        {proj.details && (
+          <p class="t-small" style="margin-bottom: 12px; opacity: 0.85;">{proj.details}</p>
+        )}
+        {proj.stats && (
+          <div style="display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 14px;">
+            {proj.stats.map((s) => (
+              <div>
+                <div class="t-subheading" style="font-size: 1.05rem;">{s.value}</div>
+                <div class="t-small" style="opacity: 0.65;">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {proj.highlights && (
+          <ul class="t-small" style="margin: 0 0 14px; padding-left: 18px; display: grid; gap: 6px;">
+            {proj.highlights.map((h) => (
+              <li>{h}</li>
+            ))}
+          </ul>
+        )}
+        {proj.stack && (
+          <p class="t-small" style="margin-bottom: 12px; opacity: 0.65;">{proj.stack.join(' · ')}</p>
+        )}
+        {proj.href && (
+          <ActionLink
+            href={proj.href}
+            external={true}
+            label={`${t.projects_view_github} →`}
+            variant="ghost"
+            small={true}
+          />
+        )}
+      </Reveal>
+    ))}
+  </div>
+</section>
+
+{/* ===== PUBLIC WORK CTA ===== */}
+<section class="page__section">
+  <Reveal class="card card--emerald" style="text-align: center; padding: 48px 32px;">
+    <p class="t-eyebrow card__eyebrow" style="color: rgba(255,255,255,0.6);">
+      {t.projects_public_work_eyebrow}
+    </p>
+    <h2 class="t-heading card__title" style="color: #fff;">
+      {t.projects_public_work_title}
+    </h2>
+    <p class="t-body card__body" style="max-width: 480px; margin: 0 auto 24px; color: rgba(255,255,255,0.85);">
+      {t.projects_public_work_body}
+    </p>
+    <div class="btn-row" style="justify-content: center;">
+      <ActionLink
+        href={siteMeta.github}
+        external={true}
+        label="GitHub"
+        variant="ghost"
+        class="btn--on-accent"
+      />
+      <ActionLink
+        href={siteMeta.huggingFace}
+        external={true}
+        label="Hugging Face"
+        variant="ghost"
+        class="btn--on-accent"
+      />
+    </div>
+  </Reveal>
+</section>

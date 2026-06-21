@@ -1,0 +1,18 @@
+---
+// Maps the demo components' --demo-* contract onto the live site design tokens,
+// so the interactive demos inherit the real palette and flip with light/dark automatically.
+---
+<div class="demo-host"><slot /></div>
+
+<style>
+  .demo-host {
+    --demo-fg: var(--text-primary);
+    --demo-muted: var(--text-secondary);
+    --demo-accent: var(--bg-accent);
+    --demo-border: var(--border);
+    --demo-surface: var(--bg-card);
+    --demo-surface-2: var(--bg-page);
+    --demo-mono: var(--font-mono);
+    --demo-sans: var(--font-body);
+  }
+</style>

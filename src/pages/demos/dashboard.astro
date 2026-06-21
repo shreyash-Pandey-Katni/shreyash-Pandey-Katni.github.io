@@ -1,0 +1,231 @@
+---
+import { projects, profile, metrics, experience } from "../../data/demoContent.js";
+import Tokenizer from "../../components/demos/Tokenizer.astro";
+import BeatPhoenix from "../../components/demos/BeatPhoenix.astro";
+import AutoHeal from "../../components/demos/AutoHeal.astro";
+import SemanticSearch from "../../components/demos/SemanticSearch.astro";
+
+const statusColor = { Released: "ok", Live: "ok", Shipped: "ok", "Hackathon winner": "ok", Parked: "warn" };
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>04 · Mission Control — Design Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #0a0f16; --panel: #111824; --panel2: #0e141d; --line: #1e293b; --fg: #e2e8f0; --muted: #64748b;
+      --ok: #39d98a; --warn: #fbbf24; --bad: #ff5c5c; --accent: #38bdf8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Inter", system-ui, sans-serif; font-size: 14px; }
+    .mono { font-family: "JetBrains Mono", monospace; }
+
+    .demobar { display: flex; align-items: center; gap: 14px; padding: 8px 16px; border-bottom: 1px solid var(--line);
+      font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--panel2); position: sticky; top: 0; z-index: 50; }
+    .demobar a { color: var(--muted); text-decoration: none; } .demobar a:hover { color: var(--accent); }
+    .demobar .spacer { flex: 1; } .demobar .active { color: var(--fg); }
+
+    .topbar { display: flex; align-items: center; gap: 16px; padding: 16px 22px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+    .topbar h1 { font-size: 18px; margin: 0; font-weight: 700; }
+    .topbar .role { color: var(--muted); font-size: 13px; }
+    .status-led { display: inline-flex; align-items: center; gap: 8px; font-family: "JetBrains Mono", monospace; font-size: 12px;
+      margin-left: auto; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; }
+    .led { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: blink 2s infinite; }
+    @keyframes blink { 50% { opacity: .4; } }
+    .clock { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); }
+
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; padding: 18px 22px; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    .panel h4 { margin: 0 0 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted);
+      font-family: "JetBrains Mono", monospace; display: flex; justify-content: space-between; }
+    .col-3 { grid-column: span 3; } .col-4 { grid-column: span 4; } .col-5 { grid-column: span 5; }
+    .col-6 { grid-column: span 6; } .col-7 { grid-column: span 7; } .col-8 { grid-column: span 8; } .col-12 { grid-column: span 12; }
+    @media (max-width: 900px) { .grid > * { grid-column: span 12 !important; } }
+
+    .gauge { display: flex; flex-direction: column; align-items: center; }
+    .gauge svg { width: 150px; height: 88px; }
+    .gauge .val { font-size: 30px; font-weight: 800; font-family: "JetBrains Mono", monospace; color: var(--ok); margin-top: -8px; }
+    .gauge .cap { color: var(--muted); font-size: 12px; }
+
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tile { background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 12px; }
+    .tile b { display: block; font-size: 22px; font-weight: 800; font-family: "JetBrains Mono", monospace; }
+    .tile span { font-size: 11px; color: var(--muted); }
+
+    .spark { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+    .spark b { font-size: 22px; font-family: "JetBrains Mono", monospace; font-weight: 700; }
+    .spark small { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 11px; }
+
+    table.svc { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.svc th { text-align: left; color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase;
+      letter-spacing: .06em; padding: 6px 8px; border-bottom: 1px solid var(--line); font-family: "JetBrains Mono", monospace; }
+    table.svc td { padding: 9px 8px; border-bottom: 1px solid var(--line); }
+    .badge { display: inline-flex; align-items: center; gap: 6px; font-family: "JetBrains Mono", monospace; font-size: 11px; }
+    .badge i { width: 8px; height: 8px; border-radius: 50%; }
+    .badge.ok i { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+    .badge.warn i { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+
+    .log { font-family: "JetBrains Mono", monospace; font-size: 12px; height: 168px; overflow: hidden; }
+    .log div { padding: 2px 0; color: var(--muted); animation: logIn .3s ease; }
+    .log .t { color: var(--accent); } .log .ok { color: var(--ok); } .log .warn { color: var(--warn); }
+    @keyframes logIn { from { opacity: 0; transform: translateY(-4px); } }
+
+    .modules { padding: 6px 22px 70px; }
+    .modules h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted);
+      font-family: "JetBrains Mono", monospace; margin: 26px 0 12px; }
+    .module { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-bottom: 14px;
+      --demo-fg: #e2e8f0; --demo-muted: #64748b; --demo-accent: #38bdf8; --demo-border: #1e293b;
+      --demo-surface: #0e141d; --demo-surface-2: #0a0f16; --demo-mono: "JetBrains Mono", monospace; --demo-sans: "Inter", sans-serif; }
+    .module .mh { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .module .mh b { font-size: 14px; } .module .mh span { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--accent); }
+    .footer { text-align: center; color: var(--muted); font-size: 12px; font-family: "JetBrains Mono", monospace; padding-bottom: 40px; }
+    a { color: var(--accent); }
+    @media (max-width: 600px) {
+      .grid { padding: 14px 12px; gap: 10px; }
+      .topbar { padding: 14px 12px; }
+      .modules { padding: 6px 12px 60px; }
+      .panel { overflow-x: hidden; }
+      table.svc { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="demobar">
+    <a href="/demos">← all designs</a><span class="spacer"></span>
+    <span class="active">04 mission-control</span>
+    <a href="/demos/graph">01</a><a href="/demos/terminal">02</a><a href="/demos/paper">03</a>
+  </nav>
+
+  <header class="topbar">
+    <h1>{profile.name}</h1>
+    <span class="role mono">// {profile.role} · {profile.location}</span>
+    <span class="status-led"><span class="led"></span> ALL SYSTEMS NOMINAL</span>
+    <span class="clock mono" id="clock">--:--:--</span>
+  </header>
+
+  <section class="grid">
+    <div class="panel col-3 gauge-panel">
+      <h4>Availability <span class="mono">SLA</span></h4>
+      <div class="gauge">
+        <svg viewBox="0 0 150 88">
+          <path d="M12 80 A63 63 0 0 1 138 80" fill="none" stroke="#1e293b" stroke-width="11" stroke-linecap="round"/>
+          <path d="M12 80 A63 63 0 0 1 138 80" fill="none" stroke="var(--ok)" stroke-width="11" stroke-linecap="round"
+            stroke-dasharray="198" stroke-dashoffset="0.4" style="filter:drop-shadow(0 0 5px var(--ok))"/>
+        </svg>
+        <div class="val">99.99%</div>
+        <div class="cap">supported uptime</div>
+      </div>
+    </div>
+
+    <div class="panel col-4">
+      <h4>Career metrics <span class="mono">cumulative</span></h4>
+      <div class="tiles">
+        {metrics.slice(0, 4).map((m) => (<div class="tile"><b>{m.value}</b><span>{m.label}</span></div>))}
+      </div>
+    </div>
+
+    <div class="panel col-5">
+      <h4>Throughput <span class="mono">live</span></h4>
+      <div class="spark"><b id="rpm">4720</b><small>SAT requests / min</small></div>
+      <canvas id="spark1" height="46" style="width:100%;height:46px"></canvas>
+      <div class="spark" style="margin-top:10px"><b id="lat">0.84s</b><small>p95 latency</small></div>
+      <canvas id="spark2" height="34" style="width:100%;height:34px"></canvas>
+    </div>
+
+    <div class="panel col-7">
+      <h4>Project services <span class="mono">{projects.length} tracked</span></h4>
+      <table class="svc">
+        <thead><tr><th>Service</th><th>Domain</th><th>Status</th><th class="mono">Signal</th></tr></thead>
+        <tbody>
+          {projects.map((p) => (
+            <tr>
+              <td><b>{p.title}</b></td>
+              <td style="color:var(--muted)">{p.category}</td>
+              <td><span class={`badge ${statusColor[p.status] || "ok"}`}><i></i>{p.status}</span></td>
+              <td class="mono" style="color:var(--muted)">{p.stats[0][1]} {p.stats[0][0].toLowerCase()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel col-5">
+      <h4>Event log <span class="mono">tail -f</span></h4>
+      <div class="log" id="log"></div>
+    </div>
+  </section>
+
+  <section class="modules">
+    <h2>// interactive modules</h2>
+    <div class="module"><div class="mh"><b>Tokenizer Playground</b><span>module/phoenix-sweta</span></div><Tokenizer /></div>
+    <div class="module"><div class="mh"><b>Semantic Search</b><span>module/retrieval</span></div><SemanticSearch /></div>
+    <div class="module"><div class="mh"><b>Auto-Healing Locators</b><span>module/sat-runtime</span></div><AutoHeal /></div>
+    <div class="module"><div class="mh"><b>Beat Phoenix 125M</b><span>module/eval</span></div><BeatPhoenix /></div>
+    <p class="footer">design demo 04 of 4 · <a href="/demos">back to gallery</a></p>
+  </section>
+
+  <script>
+    // clock
+    const clock = document.getElementById("clock");
+    setInterval(() => { clock.textContent = new Date().toTimeString().slice(0, 8); }, 1000);
+
+    // animated sparklines
+    function spark(id, base, amp, color) {
+      const c = document.getElementById(id); const ctx = c.getContext("2d");
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      const resize = () => { c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+      resize(); addEventListener("resize", resize);
+      const N = 48; const data = Array.from({ length: N }, () => base + (Math.random() - .5) * amp);
+      return () => {
+        data.push(base + (Math.random() - .5) * amp); data.shift();
+        const w = c.clientWidth, h = c.clientHeight, max = Math.max(...data), min = Math.min(...data);
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        data.forEach((v, i) => {
+          const x = (i / (N - 1)) * w, y = h - ((v - min) / (max - min || 1)) * (h - 6) - 3;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        });
+        ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+        ctx.fillStyle = color + "1a"; ctx.fill();
+        return data[data.length - 1];
+      };
+    }
+    const s1 = spark("spark1", 4700, 600, "#38bdf8");
+    const s2 = spark("spark2", 0.84, 0.3, "#39d98a");
+    const rpm = document.getElementById("rpm"), lat = document.getElementById("lat");
+    setInterval(() => {
+      rpm.textContent = Math.round(s1());
+      lat.textContent = Math.max(0.2, s2()).toFixed(2) + "s";
+    }, 900);
+
+    // event log ticker
+    const events = [
+      ['<span class="ok">PASS</span>', "sat-runtime", "locator #login healed via VLM (0.94)"],
+      ['<span class="t">INFO</span>', "phoenix", "checkpoint saved step 18000 loss 3.21"],
+      ['<span class="ok">DEPLOY</span>', "localleads", "site generated + deployed in 94s"],
+      ['<span class="t">INFO</span>', "post-swarm", "critic loop pass 7.1/10 -> approved"],
+      ['<span class="warn">WARN</span>', "rudra", "agent parked: model policy constraint"],
+      ['<span class="ok">PASS</span>', "semantic", "query embedded · top-1 cos 0.74"],
+      ['<span class="t">INFO</span>', "sweta", "hindi ppl 14.5 · kannada ppl 34.0"],
+      ['<span class="ok">OK</span>', "sat-runtime", "4 microservices healthy · 4720 rpm"],
+    ];
+    const log = document.getElementById("log");
+    let ei = 0;
+    function emit() {
+      const [lvl, svc, msg] = events[ei++ % events.length];
+      const d = document.createElement("div");
+      const ts = new Date().toTimeString().slice(0, 8);
+      d.innerHTML = `<span class="t">${ts}</span> ${lvl} <span style="color:#94a3b8">${svc}</span> ${msg}`;
+      log.prepend(d);
+      while (log.children.length > 8) log.lastChild.remove();
+    }
+    emit(); emit(); emit();
+    setInterval(emit, 2200);
+  </script>
+</body>
+</html>

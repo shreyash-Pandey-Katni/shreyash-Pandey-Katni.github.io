@@ -1,0 +1,160 @@
+---
+// Auto-Healing Locator Simulator — IBM SAT three-tier recovery ladder.
+// Break the DOM, then watch CSS selector -> text embedding -> Granite VLM recover the target.
+---
+
+<div class="demo-heal">
+  <div class="hl-stage">
+    <div class="hl-browser">
+      <div class="hl-bar"><span></span><span></span><span></span><i>app.under.test</i></div>
+      <form class="hl-app" onsubmit="return false">
+        <label>Email<input type="text" value="user@corp.io" readonly /></label>
+        <label>Password<input type="password" value="········" readonly /></label>
+        <button id="login-submit" class="hl-target" data-role="submit">Sign in</button>
+      </form>
+    </div>
+
+    <div class="hl-ladder">
+      <div class="hl-test">Test step: <code>click( locator: "#login-submit" )</code></div>
+      <div class="hl-tier" data-tier="1">
+        <span class="hl-dot"></span>
+        <div><b>Tier 1 · CSS selector</b><small>Exact match on #login-submit</small></div>
+        <span class="hl-stat"></span>
+      </div>
+      <div class="hl-tier" data-tier="2">
+        <span class="hl-dot"></span>
+        <div><b>Tier 2 · Text embedding</b><small>Nearest neighbour on label + nearby text</small></div>
+        <span class="hl-stat"></span>
+      </div>
+      <div class="hl-tier" data-tier="3">
+        <span class="hl-dot"></span>
+        <div><b>Tier 3 · Granite 3.3 VLM</b><small>Find the primary action button visually</small></div>
+        <span class="hl-stat"></span>
+      </div>
+      <div class="hl-actions">
+        <button class="hl-break">Break the DOM</button>
+        <button class="hl-run">Run test ▶</button>
+      </div>
+      <p class="hl-log"></p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .demo-heal { font-family: var(--demo-sans, "Inter", system-ui, sans-serif); color: var(--demo-fg, #18181b); }
+  .hl-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .hl-stage { grid-template-columns: 1fr; } }
+
+  .hl-browser { border: 1px solid var(--demo-border, #e4e4e7); border-radius: 12px; overflow: hidden;
+    background: var(--demo-surface, #fff); }
+  .hl-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px;
+    background: var(--demo-surface-2, #f4f4f5); border-bottom: 1px solid var(--demo-border, #e4e4e7); }
+  .hl-bar span { width: 10px; height: 10px; border-radius: 50%; background: var(--demo-border, #d4d4d8); }
+  .hl-bar i { font-family: var(--demo-mono, monospace); font-size: 11px; color: var(--demo-muted, #71717a); margin-left: 8px; }
+  .hl-app { padding: 22px; display: grid; gap: 14px; }
+  .hl-app label { display: grid; gap: 5px; font-size: 12px; color: var(--demo-muted, #71717a);
+    font-family: var(--demo-mono, monospace); }
+  .hl-app input { padding: 9px 11px; border-radius: 8px; border: 1px solid var(--demo-border, #e4e4e7);
+    background: var(--demo-surface-2, #fafafa); color: var(--demo-fg, #18181b); font-size: 14px; }
+  .hl-target { margin-top: 4px; padding: 11px; border-radius: 9px; border: 0; cursor: default;
+    background: var(--demo-accent, #6d28d9); color: #fff; font-size: 14px; font-weight: 600;
+    transition: outline .2s, box-shadow .2s; }
+  .hl-target.is-found { outline: 3px solid #16a34a; outline-offset: 3px;
+    box-shadow: 0 0 0 6px color-mix(in srgb, #16a34a 18%, transparent); }
+
+  .hl-ladder { display: flex; flex-direction: column; gap: 10px; }
+  .hl-test { font-family: var(--demo-mono, monospace); font-size: 12px; color: var(--demo-muted, #71717a);
+    margin-bottom: 2px; }
+  .hl-test code { color: var(--demo-accent, #6d28d9); }
+  .hl-tier { display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 11px;
+    border: 1px solid var(--demo-border, #e4e4e7); background: var(--demo-surface, #fff); opacity: .55; transition: .25s; }
+  .hl-tier.is-active { opacity: 1; border-color: var(--demo-accent, #6d28d9); }
+  .hl-tier.is-pass { opacity: 1; border-color: #16a34a; }
+  .hl-tier.is-fail { opacity: 1; border-color: #dc2626; }
+  .hl-tier b { font-size: 13px; display: block; }
+  .hl-tier small { font-size: 11px; color: var(--demo-muted, #71717a); }
+  .hl-tier > div { flex: 1; }
+  .hl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--demo-border, #d4d4d8); flex-shrink: 0; }
+  .hl-tier.is-active .hl-dot { background: var(--demo-accent, #6d28d9); animation: hl-pulse 1s infinite; }
+  .hl-tier.is-pass .hl-dot { background: #16a34a; }
+  .hl-tier.is-fail .hl-dot { background: #dc2626; }
+  @keyframes hl-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+  .hl-stat { font-family: var(--demo-mono, monospace); font-size: 11px; color: var(--demo-muted, #71717a); }
+  .hl-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .hl-actions button { font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 9px 14px; border-radius: 9px; }
+  .hl-break { border: 1px solid var(--demo-border, #e4e4e7); background: transparent; color: var(--demo-fg, #18181b); }
+  .hl-run { border: 0; background: var(--demo-accent, #6d28d9); color: #fff; }
+  .hl-run:disabled { opacity: .5; cursor: default; }
+  .hl-log { font-family: var(--demo-mono, monospace); font-size: 11px; min-height: 16px;
+    color: var(--demo-muted, #71717a); margin: 4px 0 0; }
+</style>
+
+<script>
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  document.querySelectorAll(".demo-heal").forEach((root) => {
+    const target = root.querySelector(".hl-target");
+    const tiers = [...root.querySelectorAll(".hl-tier")];
+    const runBtn = root.querySelector(".hl-run");
+    const breakBtn = root.querySelector(".hl-break");
+    const log = root.querySelector(".hl-log");
+    let broken = false, running = false;
+
+    const reset = () => {
+      tiers.forEach((t) => { t.className = "hl-tier"; t.querySelector(".hl-stat").textContent = ""; });
+      target.classList.remove("is-found");
+    };
+
+    breakBtn.addEventListener("click", () => {
+      if (running) return;
+      broken = !broken;
+      if (broken) {
+        target.id = "btn_x91f"; target.textContent = "Continue";
+        target.dataset.role = "submit";
+        breakBtn.textContent = "Restore DOM";
+        log.textContent = "// frontend refactor: #login-submit renamed to #btn_x91f, label changed";
+      } else {
+        target.id = "login-submit"; target.textContent = "Sign in";
+        breakBtn.textContent = "Break the DOM";
+        log.textContent = "";
+      }
+      reset();
+    });
+
+    async function lightTier(idx, { pass, stat, dwell = 850 }) {
+      const t = tiers[idx];
+      t.classList.add("is-active");
+      t.querySelector(".hl-stat").textContent = "...";
+      await sleep(dwell);
+      t.classList.remove("is-active");
+      t.classList.add(pass ? "is-pass" : "is-fail");
+      t.querySelector(".hl-stat").textContent = stat;
+    }
+
+    runBtn.addEventListener("click", async () => {
+      if (running) return;
+      running = true; runBtn.disabled = true; reset();
+      log.textContent = "// running step: click(#login-submit)";
+
+      if (!broken) {
+        await lightTier(0, { pass: true, stat: "match · 1.00" });
+        target.classList.add("is-found");
+        log.textContent = "// resolved at tier 1. step passed.";
+        running = false; runBtn.disabled = false; return;
+      }
+
+      await lightTier(0, { pass: false, stat: "no node · 0.00" });
+      log.textContent = "// tier 1 failed: selector matches nothing. escalating.";
+      await lightTier(1, { pass: true, stat: "cos 0.81 · 'Continue'~'Sign in'" });
+      // embedding gets close but below the safe threshold -> escalate for confirmation
+      tiers[1].classList.remove("is-pass"); tiers[1].classList.add("is-fail");
+      tiers[1].querySelector(".hl-stat").textContent = "0.81 < 0.85 thr";
+      log.textContent = "// tier 2 below confidence threshold. escalating to VLM.";
+      await lightTier(2, { pass: true, stat: "VLM · primary CTA · 0.94", dwell: 1100 });
+      target.classList.add("is-found");
+      log.textContent = "// healed at tier 3. locator updated to #btn_x91f. step passed.";
+      running = false; runBtn.disabled = false;
+    });
+  });
+</script>

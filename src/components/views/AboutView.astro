@@ -1,0 +1,169 @@
+---
+import Reveal from '../Reveal.astro';
+import ActionLink from '../ActionLink.astro';
+import { getContent, getUI, normalizeLocale } from '../../i18n/index.js';
+
+const locale = normalizeLocale(Astro.props.locale);
+const c = getContent(locale);
+const t = getUI(locale);
+const { siteMeta, socialLinks, primaryContactHref, aboutContent, skillGroups, certifications } = c;
+const { intro, secondary, values, outsideWork, education } = aboutContent;
+---
+
+{/* ===== INTRO ROW ===== */}
+<section class="page__section">
+  <div class="bento reveal-stagger">
+    {/* Intro — span 3 */}
+    <Reveal class="card span-3">
+      <p class="t-eyebrow card__eyebrow">{aboutContent.eyebrow}</p>
+      <h1 class="t-display card__title">{aboutContent.title}</h1>
+      <p class="t-body--lg card__body">{intro}</p>
+      <p class="t-body">{secondary}</p>
+    </Reveal>
+
+    {/* Education — dark, span 1 */}
+    <Reveal class="card card--dark span-1">
+      <p class="t-eyebrow card__eyebrow">{t.about_education}</p>
+      <h3 class="t-subheading card__title" style="color: #fff; font-size: 1rem;">
+        {education.school}
+      </h3>
+      <p class="t-small" style="color: rgba(255,255,255,0.6);">
+        {education.degree}
+      </p>
+      <p class="t-small" style="color: rgba(255,255,255,0.5);">
+        {education.years}
+      </p>
+      <p class="t-small" style="color: rgba(255,255,255,0.5); margin-top: 8px;">
+        {education.detail}
+      </p>
+    </Reveal>
+  </div>
+</section>
+
+{/* ===== VALUES ===== */}
+<section class="page__section">
+  <Reveal>
+    <p class="t-eyebrow" style="margin-bottom: 16px;">{t.about_what_i_value}</p>
+  </Reveal>
+  <div class="bento reveal-stagger">
+    {values.map((v, i) => (
+      <Reveal
+        class={`card${i === 2 ? ' span-2' : ''}`}
+      >
+        <h3 class="t-subheading card__title">{v.title}</h3>
+        <p class="t-body">{v.description}</p>
+      </Reveal>
+    ))}
+  </div>
+</section>
+
+{/* ===== SKILLS + CERTS + CTA ===== */}
+<section class="page__section">
+  <div class="bento reveal-stagger">
+    {/* Skills — span 2 */}
+    <Reveal class="card span-2">
+      <p class="t-eyebrow card__eyebrow">{t.skills_heading}</p>
+      <div class="flow--lg">
+        {skillGroups.map((group) => (
+          <div>
+            <h4 class="t-small" style="color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+              {group.title}
+            </h4>
+            <div class="chip-grid">
+              {group.items.map((item) => (
+                <span class="chip chip--outline">{item}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Reveal>
+
+    {/* Certifications — span 1 */}
+    <Reveal class="card">
+      <p class="t-eyebrow card__eyebrow">{t.about_certifications}</p>
+      <ul class="flow">
+        {certifications.map((cert) => (
+          <li class="t-small" style="color: var(--text-secondary);">
+            {cert}
+          </li>
+        ))}
+      </ul>
+    </Reveal>
+
+    {/* Contact CTA — accent, span 1 */}
+    <Reveal class="card card--accent" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <p class="t-eyebrow card__eyebrow" style="color: rgba(255,255,255,0.6);">
+          {t.about_lets_connect}
+        </p>
+        <h3 class="t-subheading card__title" style="color: #fff;">
+          {t.about_open_to_opportunities}
+        </h3>
+        <p class="t-small" style="color: rgba(255,255,255,0.8);">
+          {t.about_open_to_opportunities_body}
+        </p>
+      </div>
+      <div class="card__footer">
+        <ActionLink
+          href={primaryContactHref}
+          label={`${t.cta_get_in_touch} →`}
+          variant="ghost"
+          class="btn--on-accent"
+        />
+      </div>
+    </Reveal>
+  </div>
+</section>
+
+{/* ===== OUTSIDE WORK + SOCIALS ===== */}
+<section class="page__section">
+  <div class="bento reveal-stagger">
+    {/* Outside work — span 2 */}
+    <Reveal class="card span-2">
+      <p class="t-eyebrow card__eyebrow">{t.about_outside_work}</p>
+      <ul class="flow">
+        {outsideWork.map((item) => (
+          <li class="t-body">{item}</li>
+        ))}
+      </ul>
+    </Reveal>
+
+    {/* Social links — span 2 */}
+    <Reveal class="card span-2">
+      <p class="t-eyebrow card__eyebrow">{t.about_find_me_online}</p>
+      <div class="social-row" style="margin-top: 12px;">
+        {socialLinks.map((link) => (
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noreferrer"
+            class="social-item"
+          >
+            {link.name} <span aria-hidden="true">↗</span>
+          </a>
+        ))}
+      </div>
+      <button
+        class="email-chip"
+        data-copy-email="shreyash.pandey.katni@gmail.com"
+        aria-label={t.about_copy_email}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        shreyash.pandey.katni@gmail.com
+      </button>
+      <div style="margin-top: 20px;">
+        <ActionLink
+          href={siteMeta.topmate}
+          external={true}
+          label={t.about_book_session}
+          variant="secondary"
+          small={true}
+        />
+      </div>
+    </Reveal>
+  </div>
+</section>

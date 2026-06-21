@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AboutView from '../../components/views/AboutView.astro';
+import { getContent } from '../../i18n/index.js';
+
+const locale = 'zh';
+const { title, description } = getContent(locale).pageMeta['/about'];
+---
+
+<BaseLayout title={title} description={description}>
+  <AboutView locale={locale} />
+</BaseLayout>

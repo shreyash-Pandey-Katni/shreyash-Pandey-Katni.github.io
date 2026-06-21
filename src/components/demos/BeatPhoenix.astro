@@ -1,0 +1,222 @@
+---
+// Beat Phoenix — WinoGrande-style commonsense game.
+// Real path: loads Phoenix 125M (ONNX int8) via Transformers.js and picks each
+// answer by actual sequence log-likelihood. If the model can't load, it falls
+// back to a pre-scored pick and labels itself "scripted".
+---
+
+<div class="demo-beat">
+  <div class="bt-head">
+    <span class="bt-progress">Q<span class="bt-i">1</span> / <span class="bt-total">5</span></span>
+    <span class="bt-engine" data-state="idle">·</span>
+    <span class="bt-score">You <b class="bt-you">0</b> · Phoenix <b class="bt-phx">0</b></span>
+  </div>
+
+  <p class="bt-prompt"></p>
+  <div class="bt-options"></div>
+  <div class="bt-reveal" hidden>
+    <p class="bt-verdict"></p>
+    <button class="bt-next">Next →</button>
+  </div>
+  <div class="bt-final" hidden></div>
+</div>
+
+<style is:global>
+  .demo-beat {
+    font-family: var(--demo-sans, "Inter", system-ui, sans-serif);
+    color: var(--demo-fg, #18181b);
+  }
+  .bt-head { display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    font-family: var(--demo-mono, monospace); font-size: 12px;
+    color: var(--demo-muted, #71717a); margin-bottom: 16px; }
+  .bt-score b { color: var(--demo-fg, #18181b); }
+  .bt-engine { font-size: 10px; padding: 3px 8px; border-radius: 999px; margin-right: auto;
+    border: 1px solid var(--demo-border, #e4e4e7); white-space: nowrap; }
+  .bt-engine[data-state="live"] { color: #16a34a; border-color: color-mix(in srgb, #16a34a 40%, transparent); }
+  .bt-engine[data-state="live"]::before { content: "● "; }
+  .bt-engine[data-state="loading"] { color: var(--demo-accent, #6d28d9); border-color: color-mix(in srgb, var(--demo-accent, #6d28d9) 40%, transparent); }
+  .bt-engine[data-state="scripted"] { color: #d97706; border-color: color-mix(in srgb, #d97706 40%, transparent); }
+  .bt-prompt { font-size: 18px; line-height: 1.55; font-weight: 600; margin: 0 0 18px; }
+  .bt-prompt .blank { color: var(--demo-accent, #6d28d9);
+    border-bottom: 2px dashed var(--demo-accent, #6d28d9); padding: 0 6px; }
+  .bt-options { display: grid; gap: 10px; }
+  .bt-opt {
+    display: flex; align-items: center; gap: 14px;
+    text-align: left; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
+    padding: 13px 15px; border-radius: 14px;
+    border: 1px solid var(--demo-border, #e4e4e7);
+    background: var(--demo-surface, #fff); color: var(--demo-fg, #18181b);
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+  }
+  .bt-opt:hover:not(:disabled) {
+    border-color: var(--demo-accent, #6d28d9); transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+  }
+  .bt-opt:disabled { cursor: default; }
+  .bt-badge {
+    flex-shrink: 0; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+    font-family: var(--demo-mono, monospace); font-weight: 700; font-size: 14px;
+    background: color-mix(in srgb, var(--demo-accent, #6d28d9) 13%, transparent);
+    color: var(--demo-accent, #6d28d9); transition: .15s;
+  }
+  .bt-opt:hover:not(:disabled) .bt-badge { background: var(--demo-accent, #6d28d9); color: #fff; }
+  .bt-text { flex: 1; }
+  .bt-opt.is-correct { border-color: #16a34a; background: color-mix(in srgb, #16a34a 10%, transparent); }
+  .bt-opt.is-correct .bt-badge { background: #16a34a; color: #fff; }
+  .bt-opt.is-wrong { border-color: #dc2626; background: color-mix(in srgb, #dc2626 10%, transparent); }
+  .bt-opt.is-wrong .bt-badge { background: #dc2626; color: #fff; }
+  .bt-tag { margin-left: auto; flex-shrink: 0;
+    font-family: var(--demo-mono, monospace); font-size: 10px; display: flex; gap: 6px; align-items: center; }
+  .bt-tag span { padding: 3px 8px; border-radius: 999px; border: 1px solid currentColor; line-height: 1; }
+  .bt-tag .pick-you { color: #2563eb; }
+  .bt-tag .pick-phx { color: #d97706; }
+  .bt-reveal { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .bt-verdict { font-size: 14px; margin: 0; color: var(--demo-muted, #71717a); }
+  .bt-next, .bt-restart {
+    font-family: var(--demo-sans, inherit); font-weight: 600; font-size: 14px; cursor: pointer;
+    padding: 10px 20px; border-radius: 999px; border: 0;
+    background: var(--demo-accent, #6d28d9); color: #fff;
+    transition: transform .15s, filter .15s;
+  }
+  .bt-next:hover, .bt-restart:hover { transform: translateY(-1px); filter: brightness(1.07); }
+  .bt-final { text-align: center; padding: 8px 0; }
+  .bt-final h4 { font-size: 20px; margin: 0 0 6px; }
+  .bt-final p { color: var(--demo-muted, #71717a); margin: 0 0 16px; font-size: 14px; }
+</style>
+
+<script>
+  const MODEL_ID = "shreyash-pandey-katni/phoenix-125m-onnx";
+
+  // prompt uses __ for the blank. fb = pre-scored fallback pick (used only if the model can't load).
+  const Q = [
+    { p: "The trophy did not fit in the suitcase because __ was too big.", o: ["the trophy", "the suitcase"], correct: 0, fb: 1 },
+    { p: "Sam fixed the bug faster than Maya because __ had written the original code.", o: ["Sam", "Maya"], correct: 0, fb: 0 },
+    { p: "The model overfit the small dataset, so the engineer added more __.", o: ["regularization", "parameters"], correct: 0, fb: 1 },
+    { p: "I poured water from the bottle into the cup until __ was empty.", o: ["the bottle", "the cup"], correct: 0, fb: 0 },
+    { p: "The GPU ran out of memory, so they enabled gradient __ to keep training.", o: ["checkpointing", "descent"], correct: 0, fb: 1 },
+  ];
+
+  /* ── Phoenix model (lazy) ──────────────────────────────────── */
+  let modelPromise = null;
+  function loadModel() {
+    if (!modelPromise) modelPromise = (async () => {
+      const t = await import("https://esm.sh/@huggingface/transformers@3");
+      t.env.allowLocalModels = false;
+      const [tok, model] = await Promise.all([
+        t.AutoTokenizer.from_pretrained(MODEL_ID),
+        t.AutoModelForCausalLM.from_pretrained(MODEL_ID, { dtype: "q8" }),
+      ]);
+      return { tok, model };
+    })().catch((e) => { console.warn("Phoenix load failed:", e); return "failed"; });
+    return modelPromise;
+  }
+
+  // length-normalised average log-likelihood of a full sentence
+  async function scoreSentence(mp, text) {
+    const enc = await mp.tok(text);
+    const { logits } = await mp.model(enc);
+    const T = logits.dims[1], V = logits.dims[2];
+    const data = logits.data, ids = enc.input_ids.data;
+    let ll = 0, n = 0;
+    for (let pos = 0; pos < T - 1; pos++) {
+      const off = pos * V;
+      let max = -Infinity;
+      for (let v = 0; v < V; v++) { const x = data[off + v]; if (x > max) max = x; }
+      let s = 0; for (let v = 0; v < V; v++) s += Math.exp(data[off + v] - max);
+      const lse = max + Math.log(s);
+      ll += data[off + Number(ids[pos + 1])] - lse; n++;
+    }
+    return ll / n;
+  }
+
+  async function phoenixChoose(q) {
+    const mp = await loadModel();
+    if (mp === "failed") return { pick: q.fb, live: false };
+    const scores = await Promise.all(q.o.map((opt) => scoreSentence(mp, q.p.replace("__", opt))));
+    return { pick: scores[0] >= scores[1] ? 0 : 1, live: true };
+  }
+
+  document.querySelectorAll(".demo-beat").forEach((root) => {
+    let i = 0, you = 0, phx = 0, answered = false, pending = null;
+    const promptEl = root.querySelector(".bt-prompt");
+    const optsEl = root.querySelector(".bt-options");
+    const revealEl = root.querySelector(".bt-reveal");
+    const verdictEl = root.querySelector(".bt-verdict");
+    const finalEl = root.querySelector(".bt-final");
+    const iEl = root.querySelector(".bt-i");
+    const youEl = root.querySelector(".bt-you");
+    const phxEl = root.querySelector(".bt-phx");
+    const engineEl = root.querySelector(".bt-engine");
+    root.querySelector(".bt-total").textContent = Q.length;
+
+    const setEngine = (state, label) => { engineEl.dataset.state = state; engineEl.textContent = label; };
+    setEngine("loading", "loading Phoenix 125M…");
+    loadModel().then((mp) => { if (mp === "failed") setEngine("scripted", "scripted (model offline)"); });
+
+    function draw() {
+      answered = false;
+      const q = Q[i];
+      iEl.textContent = i + 1;
+      promptEl.innerHTML = q.p.replace("__", '<span class="blank">______</span>');
+      optsEl.innerHTML = "";
+      revealEl.hidden = true;
+      q.o.forEach((text, idx) => {
+        const b = document.createElement("button");
+        b.className = "bt-opt";
+        b.innerHTML = `<span class="bt-badge">${String.fromCharCode(65 + idx)}</span><span class="bt-text"></span>`;
+        b.querySelector(".bt-text").textContent = text;
+        b.addEventListener("click", () => choose(idx));
+        optsEl.appendChild(b);
+      });
+      pending = phoenixChoose(q); // compute Phoenix's pick in the background
+    }
+
+    async function choose(idx) {
+      if (answered) return;
+      answered = true;
+      const q = Q[i];
+      const { pick, live } = await pending;
+      setEngine(live ? "live" : "scripted", live ? "live · phoenix-125m" : "scripted (model offline)");
+      const youRight = idx === q.correct;
+      const phxRight = pick === q.correct;
+      if (youRight) you++;
+      if (phxRight) phx++;
+      youEl.textContent = you; phxEl.textContent = phx;
+
+      [...optsEl.children].forEach((b, bi) => {
+        b.disabled = true;
+        if (bi === q.correct) b.classList.add("is-correct");
+        else if (bi === idx) b.classList.add("is-wrong");
+        const tag = document.createElement("span");
+        tag.className = "bt-tag";
+        if (bi === idx) tag.innerHTML += '<span class="pick-you">you</span>';
+        if (bi === pick) tag.innerHTML += '<span class="pick-phx">phoenix</span>';
+        if (tag.children.length) b.appendChild(tag);
+      });
+
+      verdictEl.textContent = youRight
+        ? (phxRight ? "Both right. Phoenix held its ground." : "You got it. Phoenix guessed wrong.")
+        : (phxRight ? "Phoenix won that one." : "Tricky. Neither of you got it.");
+      revealEl.hidden = false;
+    }
+
+    function next() { i++; if (i >= Q.length) return finish(); draw(); }
+
+    function finish() {
+      promptEl.hidden = true; optsEl.hidden = true; revealEl.hidden = true;
+      finalEl.hidden = false;
+      const verdict = you > phx ? "You beat Phoenix 125M." : you === phx ? "Dead even with Phoenix." : "Phoenix beat you.";
+      finalEl.innerHTML =
+        `<h4>${verdict}</h4><p>Final: you ${you}/${Q.length} · Phoenix ${phx}/${Q.length}. ` +
+        `Phoenix scores ~0.507 on WinoGrande, barely above the 0.50 coin flip. That honesty is the point.</p>` +
+        `<button class="bt-restart">Play again</button>`;
+      finalEl.querySelector(".bt-restart").addEventListener("click", () => {
+        i = 0; you = 0; phx = 0; youEl.textContent = 0; phxEl.textContent = 0;
+        promptEl.hidden = false; optsEl.hidden = false; finalEl.hidden = true; draw();
+      });
+    }
+
+    root.querySelector(".bt-next").addEventListener("click", next);
+    draw();
+  });
+</script>

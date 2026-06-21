@@ -1,0 +1,145 @@
+---
+import { projects, profile, experience, metrics } from "../../data/demoContent.js";
+import Tokenizer from "../../components/demos/Tokenizer.astro";
+import BeatPhoenix from "../../components/demos/BeatPhoenix.astro";
+import AutoHeal from "../../components/demos/AutoHeal.astro";
+import SemanticSearch from "../../components/demos/SemanticSearch.astro";
+
+const featured = projects.slice(0, 5);
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>03 · Model Card — Design Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink: #16181d; --muted: #5b6066; --rule: #d9dce1; --link: #1d4ed8; --paper: #fbfbf9; --tint: #f1f2ee; --accent: #1d4ed8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink);
+      font-family: "Newsreader", Georgia, serif; font-size: 18px; line-height: 1.65; }
+    .mono { font-family: "JetBrains Mono", monospace; }
+
+    .demobar { display: flex; align-items: center; gap: 14px; padding: 9px 18px; border-bottom: 1px solid var(--rule);
+      font-family: "JetBrains Mono", monospace; font-size: 12px; background: var(--tint); position: sticky; top: 0; z-index: 50; }
+    .demobar a { color: var(--muted); text-decoration: none; } .demobar a:hover { color: var(--link); }
+    .demobar .spacer { flex: 1; } .demobar .active { color: var(--ink); }
+
+    .sheet { max-width: 760px; margin: 0 auto; padding: 56px 28px 90px; }
+    .arxiv { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--muted); margin: 0 0 26px;
+      border-left: 3px solid var(--accent); padding-left: 12px; }
+    h1.title { font-size: 34px; line-height: 1.2; font-weight: 600; text-align: center; margin: 0 0 14px; letter-spacing: -.01em; }
+    .authors { text-align: center; font-size: 17px; margin: 0 0 4px; }
+    .affil { text-align: center; font-size: 14px; color: var(--muted); margin: 0 0 30px; }
+    .affil a { color: var(--link); }
+
+    .abstract { background: var(--tint); border: 1px solid var(--rule); border-radius: 4px; padding: 20px 24px; margin: 0 0 14px; }
+    .abstract h3 { text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .12em; margin: 0 0 8px; }
+    .abstract p { font-size: 16px; margin: 0; }
+
+    h2.sec { font-size: 22px; font-weight: 600; margin: 44px 0 10px; }
+    h2.sec .n { color: var(--accent); margin-right: 10px; font-family: "JetBrains Mono", monospace; font-size: 16px; }
+    h3.sub { font-size: 18px; font-weight: 600; margin: 26px 0 6px; }
+    p { margin: 0 0 14px; }
+
+    table.bench { width: 100%; border-collapse: collapse; font-size: 15px; margin: 10px 0 6px; }
+    table.bench caption { caption-side: bottom; font-size: 13px; color: var(--muted); text-align: left; padding-top: 8px; }
+    table.bench th, table.bench td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+    table.bench thead th { border-bottom: 2px solid var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+    table.bench td.mono, table.bench th.num { font-family: "JetBrains Mono", monospace; }
+    .num { text-align: right !important; }
+
+    .figure { border: 1px solid var(--rule); border-radius: 4px; padding: 22px; margin: 18px 0 8px; background: #fff;
+      --demo-fg: #16181d; --demo-muted: #5b6066; --demo-accent: #1d4ed8; --demo-border: #d9dce1;
+      --demo-surface: #fff; --demo-surface-2: #f6f7f4;
+      --demo-mono: "JetBrains Mono", monospace; --demo-sans: "Newsreader", Georgia, serif; }
+    .figcap { font-size: 13px; color: var(--muted); margin: 10px 0 24px; }
+    .figcap b { color: var(--ink); }
+
+    .refs { font-size: 14px; color: var(--muted); }
+    .refs li { margin-bottom: 6px; }
+    .refs a { color: var(--link); }
+    .footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 40px; font-family: "JetBrains Mono", monospace; }
+    a { color: var(--link); }
+  </style>
+</head>
+<body>
+  <nav class="demobar">
+    <a href="/demos">← all designs</a><span class="spacer"></span>
+    <span class="active">03 model-card</span>
+    <a href="/demos/graph">01</a><a href="/demos/terminal">02</a><a href="/demos/dashboard">04</a>
+  </nav>
+
+  <article class="sheet">
+    <p class="arxiv">arXiv:2606.00001v1 [cs.SE] · {profile.location} · {new Date().getFullYear()}</p>
+    <h1 class="title">Building AI Systems That Survive Production:<br />A Portfolio</h1>
+    <p class="authors">{profile.name}</p>
+    <p class="affil">{profile.role}, IBM Software Labs · <a href={`mailto:${profile.email}`}>{profile.email}</a></p>
+
+    <div class="abstract">
+      <h3>Abstract</h3>
+      <p>
+        This portfolio documents work at the intersection of applied AI, backend engineering, and reliability:
+        a 125M language model trained from scratch on a single consumer GPU, multilingual Indic models, agentic
+        publishing and security systems, and a three-tier locator auto-healing system shipped inside IBM's test
+        automation. We report honest benchmarks and provide four interactive artifacts that run entirely in the reader's browser.
+      </p>
+    </div>
+
+    <h2 class="sec"><span class="n">1</span>Selected results</h2>
+    <p>The systems below were evaluated under internal or public benchmarks. Numbers are reported as measured, including where they are near chance.</p>
+    <table class="bench">
+      <thead><tr><th>Metric</th><th class="num">Value</th></tr></thead>
+      <tbody>
+        {metrics.map((m) => (<tr><td>{m.label}</td><td class="num mono">{m.value}</td></tr>))}
+      </tbody>
+      <caption><b>Table 1.</b> Headline metrics across shipped and research systems.</caption>
+    </table>
+
+    <h2 class="sec"><span class="n">2</span>Systems</h2>
+    {featured.map((p, i) => (
+      <div>
+        <h3 class="sub">2.{i + 1}&nbsp; {p.title} <span class="mono" style="font-size:13px;color:var(--muted)">({p.status})</span></h3>
+        <p>{p.summary}</p>
+        <table class="bench">
+          <thead><tr><th>Property</th><th class="num">Value</th></tr></thead>
+          <tbody>{p.stats.map(([k, v]) => (<tr><td>{k}</td><td class="num mono">{v}</td></tr>))}</tbody>
+          <caption>Table 2.{i + 1}. {p.title} — {p.tech.join(", ")}. <a href={p.href} target="_blank" rel="noopener">artifact ↗</a></caption>
+        </table>
+      </div>
+    ))}
+
+    <h2 class="sec"><span class="n">3</span>Interactive artifacts</h2>
+    <p>All four artifacts execute client-side. No inference server is contacted; computation runs in JavaScript on the reader's device.</p>
+
+    <div class="figure"><Tokenizer /></div>
+    <p class="figcap"><b>Figure 1.</b> BPE tokenization under the Phoenix 32K English vocabulary versus the Sweta 64K joint vocabulary. Note the fragmentation of Indic scripts under the English-only tokenizer.</p>
+
+    <div class="figure"><SemanticSearch /></div>
+    <p class="figcap"><b>Figure 2.</b> Semantic retrieval over the project corpus via TF-IDF and cosine similarity, computed in-browser.</p>
+
+    <div class="figure"><AutoHeal /></div>
+    <p class="figcap"><b>Figure 3.</b> The three-tier locator auto-healing ladder. Recovery escalates from exact CSS match to text embedding to a vision-language model.</p>
+
+    <div class="figure"><BeatPhoenix /></div>
+    <p class="figcap"><b>Figure 4.</b> Commonsense reasoning game versus Phoenix-125M. The model scores ~0.507 on WinoGrande (chance = 0.50).</p>
+
+    <h2 class="sec"><span class="n">4</span>Experience</h2>
+    {experience.map((e) => (
+      <p><b>{e.role}</b>, {e.company} <span class="mono" style="font-size:13px;color:var(--muted)">({e.period})</span>. {e.summary}</p>
+    ))}
+
+    <h2 class="sec">References</h2>
+    <ol class="refs">
+      <li>{profile.name}. HuggingFace model releases. <a href={profile.huggingFace} target="_blank" rel="noopener">{profile.huggingFace}</a></li>
+      <li>{profile.name}. Source repositories. <a href={profile.github} target="_blank" rel="noopener">{profile.github}</a></li>
+    </ol>
+
+    <p class="footer">design demo 03 of 4 · <a href="/demos">back to gallery</a></p>
+  </article>
+</body>
+</html>

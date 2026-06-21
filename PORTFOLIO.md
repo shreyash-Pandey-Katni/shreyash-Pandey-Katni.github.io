@@ -102,7 +102,9 @@ A LLaMA-style 125M parameter model trained from scratch on a single RTX 3080 Ti 
 - **Evaluation:** Perplexity on WikiText-103. Zero-shot benchmarks: HellaSwag, WinoGrande, ARC-Easy, LAMBADA, PIQA.
 - **Release:** Custom `PhoenixForCausalLM` class registered with HuggingFace Auto classes. Full tokenizer, model card, inference examples.
 
-**Tech:** PyTorch 2.x, HuggingFace Transformers, FlashAttention, RoPE, SwiGLU, RMSNorm, MinHash LSH, XLM-RoBERTa, PyMuPDF, Ray, RTX 3080 Ti
+**Tech:** PyTorch 2.x, HuggingFace Transformers, FlashAttention, RoPE, SwiGLU, RMSNorm, MinHash LSH, XLM-RoBERTa, PyMuPDF, Ray, MLflow, Weights & Biases, DVC, RTX 3080 Ti
+
+**Experiment tracking:** Runs, hyperparameters, and metrics logged to MLflow and Weights & Biases; datasets and pipeline stages versioned with DVC for reproducible training.
 
 ---
 
@@ -209,6 +211,116 @@ An end-to-end backend system for local business discovery, AI content generation
 
 ---
 
+### ATIS — Autonomous trading intelligence system
+**Status: In Progress**
+
+A near-institutional-grade multi-agent AI system for swing trading on Indian equities: a 6-tier pipeline of 59 agents that ingests research papers and filings, builds a causal Neo4j knowledge graph, backtests theses with walk-forward and Monte Carlo validation, and generates daily ranked swing-trade signals across 600 NSE/BSE stocks — all on free data.
+
+**Why:** I wanted to replace intuition-based trading with something systematic and auditable, where every signal traces to a validated, backtested thesis. The free-data-only constraint forced cleaner thinking, and the Rust hot path came from a real pain point (broker connection limits and Python's 5–15 ms latency floor), not from wanting to use Rust for its own sake.
+
+| Stat | Value |
+|------|-------|
+| Agents | 59 across 7 layers |
+| Tick-to-signal latency | < 5 μs (Rust hot path) |
+| System effectiveness | 85/100 on free data |
+| Stocks covered | 600 NSE/BSE |
+
+**Architecture:**
+- **Six-tier pipeline:** knowledge ingestion → causal graph build → backtesting → daily screening → graph reasoning → live monitoring and output.
+- **Knowledge graph:** Neo4j with 6 layers, 20 node types, 25 edge types, enabling second- and third-order causal propagation. A GraphRAG verification agent checks every LLM claim against Neo4j facts and alerts when per-agent hallucination rate exceeds 15%.
+- **Rust hot path:** a single Dhan WebSocket feeds Chronicle Queue, which fans out ticks to live, dummy, and backtest consumers in under 5 μs — eliminating GIL overhead and broker connection exhaustion.
+- **Backtesting:** walk-forward and Monte Carlo validation via VectorBT with full transaction-cost accounting. Elo-based thesis lifecycle management and temporal edge decay let the knowledge improve without manual intervention.
+- **3-machine K3s cluster:** PostgreSQL, Neo4j, Qdrant, and Redis across three home machines with Ceph replication (factor 2); any one node can fail and trading continues.
+
+**Tech:** Python 3.11, Rust (Chronicle Queue), LangGraph, Neo4j, Qwen2.5 14B + Mistral 7B via Ollama, Claude API, K3s, Ceph, PostgreSQL, Redis Streams + Sentinel, Qdrant, Docker, VectorBT, Optuna, spaCy, Telegram Bot API
+
+---
+
+### CodeAtlas — Code comprehension tool
+**Status: Released · https://github.com/shreyash-Pandey-Katni/CodeAtlas**
+
+Paste C source code, get an interactive Mermaid flowchart for every function rendered on a Figma-like canvas with zoom, pan, and SVG/PNG export. One FastAPI backend exposes two interchangeable diagram engines — a deterministic AST path and an LLM path — served to a React canvas.
+
+**Why:** Reading unfamiliar C is slow, and most diagram tools need a heavy IDE or hand-drawing. Building both an AST engine and an LLM engine forced a clean separation: the deterministic path proves correctness and runs without a model, while the LLM path adds richer narration when a backend is available.
+
+| Stat | Value |
+|------|-------|
+| Diagram engines | 2 (AST + LLM) |
+| Dockerized services | 4 |
+| Default LLM | Local via Ollama (free, offline) |
+
+**Architecture:**
+- **Two engines:** ast-grep parses C and emits Mermaid directly (deterministic, no model); LLM mode sends each function through LiteLLM, so the same code runs against Ollama, GitHub Models, OpenAI, or Anthropic, switched by config.
+- **Persistence:** aiosqlite stores parsed functions and generated diagrams.
+- **Frontend canvas:** React 19 + TypeScript with Tailwind and Mermaid 11, built with Vite and served by Nginx (which also proxies the API and WebSocket). Zoom, pan, and SVG/PNG export per function.
+
+**Tech:** FastAPI (Python 3.11), ast-grep-py, LiteLLM, aiosqlite, Uvicorn, Docker Compose (4 services), Nginx, Ollama, React 19, TypeScript, Tailwind CSS 4, Mermaid 11, Vite
+
+---
+
+### GraphMind — GraphRAG knowledge graph
+**Status: Released · https://github.com/shreyash-Pandey-Katni/GraphMind**
+
+A GraphRAG system over financial trade data that fuses a Neo4j knowledge graph, dense vector search, and BM25 into one retrieval surface, answered by a LangGraph ReAct agent that picks the right retriever per question.
+
+**Why:** Pure vector RAG misses relationship questions and a pure knowledge graph misses fuzzy semantic ones. Financial data needs both, plus exact-match on tickers like HDFCBANK that embeddings smear together. Building all three retrievers and fusing them taught me where each one breaks.
+
+| Stat | Value |
+|------|-------|
+| Retrievers fused | 3 (graph + dense + BM25) |
+| Merge strategy | Reciprocal Rank Fusion |
+| Routing | LangGraph ReAct agent |
+
+**Architecture:**
+- **Knowledge graph:** Neo4j Cypher for multi-hop analyst, fund, trade, instrument, and sector relationships.
+- **Dense + sparse:** ChromaDB vector search over sentence-transformer embeddings, plus BM25Okapi for exact terms like tickers; the two are merged with Reciprocal Rank Fusion before ranking.
+- **Routing:** a LangGraph ReAct agent selects graph traversal, vector search, or hybrid retrieval per question. Uniqueness constraints on Instrument, Fund, Trade, Analyst, and Sector nodes prevent duplicates during MERGE-based ingestion.
+
+**Tech:** Neo4j 5.20, Cypher, ChromaDB, rank_bm25 (BM25Okapi), sentence-transformers, LangGraph, LangChain, NetworkX, Reciprocal Rank Fusion, spaCy, Ollama, Docker Compose
+
+---
+
+### PaperGraph — GraphRAG with an LLM firewall
+**Status: Built · https://github.com/shreyash-Pandey-Katni/papergraph**
+
+GraphRAG question-answering over a curated corpus of research papers, fronted by a four-layer LLM firewall, with offline RAGAS evaluation and self-hosted Langfuse tracing, packaged for GCP Cloud Run.
+
+- **GraphRAG retrieval:** Neo4j knowledge-graph traversal plus vector search (pgvector and Chroma), fused with reciprocal-rank fusion.
+- **Four-layer LLM firewall:** input intent-gate, retrieved-chunk sanitizer (indirect prompt-injection defense), output guard, and per-IP rate/token/cost caps.
+- **Measured 100% injection-block rate** on a 20-prompt adversarial set, with zero false positives on benign questions.
+- **Observability:** offline RAGAS evaluation (faithfulness, context-precision) and self-hosted Langfuse tracing of latency, token cost, and retrieval hits. Dockerized for GCP Cloud Run; 45 passing tests.
+
+**Tech:** Python, FastAPI, Neo4j, pgvector, Chroma, Langfuse, RAGAS, Ollama, Llama Guard, Docker, GCP Cloud Run
+
+---
+
+### KiranaIQ — demand-forecasting + inventory copilot
+**Status: Built · https://github.com/shreyash-Pandey-Katni/KiranaIQ**
+
+A demand-forecasting and inventory copilot for small Indian kirana stores: snap a bill, get per-SKU forecasts, plain-language explanations, reorder quantities, and price experiments.
+
+- **Forecasting:** per-SKU demand with a global LightGBM (Tweedie) model against seasonal-naive and AutoETS baselines — measured WAPE 35.8% vs 62.1% for seasonal-naive **on synthetic retail data**.
+- **Explainability:** SHAP turns every forecast into plain language a shopkeeper understands (festivals, paydays, day-of-week effects).
+- **Ingestion + actions:** OCR reads a photo of a bill or GST invoice into structured SKU-level line items; newsvendor reorder quantities plus market-basket cross-sell; an A/B harness (Bayesian and sequential tests) for price and promo experiments.
+- **Interface:** primary interface is a Telegram bot (built, token-gated, 17 handler tests passing). As of June 2026, Telegram is blocked in India under a Government of India order, so the live bot is not reachable from India without a VPN; it is deployable to a cloud host, with a webhook/alternative channel as the fallback. 64 tests passing overall.
+
+**Tech:** Python, LightGBM, SHAP, StatsForecast, OCR, FastAPI, python-telegram-bot, pandas
+
+---
+
+### hybrid-search-bench — learning-to-rank retrieval benchmark
+**Status: Built · https://github.com/shreyash-Pandey-Katni/hybrid-search-bench**
+
+An honest hybrid-retrieval benchmark: BM25, SPLADE, and dense retrieval, fused and then reranked by a LambdaMART learning-to-rank model, measured on a public BEIR dataset.
+
+- **Three legs on the same BEIR qrels:** BM25 (bm25s), SPLADE learned-sparse, and a dense bi-encoder over FAISS.
+- **Reranking:** reciprocal-rank-fusion baseline, then a LightGBM LambdaMART reranker over the fused candidates (per-leg scores, ranks, agreement features).
+- **BEIR SciFact:** LambdaMART nDCG@10 0.778 vs 0.728 for RRF fusion (+6.9%); MRR 0.761 (+9.1%). BM25 at nDCG@10 0.686 matches the published BEIR figure, anchoring the pipeline as correct rather than flattering.
+
+**Tech:** Python, bm25s, SPLADE, FAISS, LightGBM (LambdaMART), BEIR / ir_datasets, ranx
+
+---
+
 ## Archive Projects (Pre-2026)
 
 | Year | Project | Summary |
@@ -226,13 +338,13 @@ An end-to-end backend system for local business discovery, AI content generation
 Python · Java · Go · SQL · JavaScript
 
 ### AI and ML
-PyTorch · Transformers · LLM pretraining · Deep learning · NLP · Computer vision · LangChain · HuggingFace · FAISS · Knowledge graphs · Text embeddings
+PyTorch · Transformers · LLM pretraining · Deep learning · NLP · Computer vision · LangChain · HuggingFace · FAISS · Knowledge graphs · Text embeddings · LightGBM · SHAP · Learning-to-rank (LambdaMART) · A/B testing · RAGAS · Langfuse · OCR
 
 ### Backend and Platform
 Microservices · REST APIs · Spring Boot · Kafka · gRPC · Flask · Node.js · Express
 
 ### DevOps and Data
-Docker · Jenkins · NGINX · Git · Linux · MySQL · MongoDB · Cassandra · Redis
+Docker · Jenkins · NGINX · Git · Linux · MySQL · MongoDB · Cassandra · Redis · PostgreSQL · pgvector
 
 ---
 

@@ -61,9 +61,9 @@ const { title, description } = pageMeta['/projects'];
   <section class="page__section">
     <div class="bento reveal-stagger">
       {flagshipProjects.map((proj, i) => {
-        const isDark = i === 0 || i === 3;
-        // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2.
-        const isWide = i === 0 || i === 1 || i === 4 || i === 7;
+        const isDark = i === 0 || i === 3 || i === 10;
+        // Keep row balance in 4-col grid: 2+2 / 1+1+2 / 1+1+2 / 1+1+2 / 2+2.
+        const isWide = i === 0 || i === 1 || i === 4 || i === 7 || i === 10 || i === 11 || i === 12;
         const spanClass = isWide ? 'span-2' : '';
         const isModelCard = proj.ctaLabel === 'View model card';
         const ctaVariant = isDark ? 'ghost' : isModelCard ? 'accent' : 'ghost';
@@ -153,7 +153,7 @@ const { title, description } = pageMeta['/projects'];
   {/* ===== ROADMAP / IN PROGRESS ===== */}
   <section class="page__section">
     <Reveal>
-      <p class="t-eyebrow" style="margin-bottom: 8px;">In progress</p>
+      <p class="t-eyebrow" style="margin-bottom: 8px;">On the roadmap</p>
       <p class="t-body" style="margin-bottom: 20px; max-width: 600px;">
         {projectsContent.roadmapIntro}
       </p>
